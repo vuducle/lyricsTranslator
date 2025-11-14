@@ -1,12 +1,14 @@
 package org.example.javamusicapp.service;
 
 import jakarta.transaction.Transactional;
+import org.example.javamusicapp.controller.authController.dto.AuthResponse;
 import org.example.javamusicapp.handler.TokenRefreshException;
 import org.example.javamusicapp.model.RefreshToken;
 import org.example.javamusicapp.model.User;
 import org.example.javamusicapp.repository.RefreshTokenRepository;
 import org.example.javamusicapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -75,11 +77,16 @@ public class RefreshTokenService {
      */
     @Transactional
     public int deleteByUserId(Long userId) {
-        // 1. Hole den User (hier brauchst du das UserRepository!)
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        return 0;
+    }
 
-        // 2. Rufe die korrigierte Repository-Methode auf
-        return refreshTokenRepository.deleteByUser(user); // Gibt jetzt int zurück
+    /**
+     * Sucht den Refresh Token in der Datenbank.
+     * @param token Der String des Refreshtokens.
+     * @return Optional<RefreshToken>
+     */
+    public Optional<RefreshToken> findByToken(String token) {
+        // Delegation an das Repository
+        return refreshTokenRepository.findByToken(token);
     }
 }

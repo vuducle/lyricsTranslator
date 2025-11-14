@@ -1,4 +1,4 @@
-package org.example.javamusicapp.auth;
+package org.example.javamusicapp.config.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

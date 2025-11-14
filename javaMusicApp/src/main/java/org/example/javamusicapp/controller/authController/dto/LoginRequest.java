@@ -1,4 +1,4 @@
-package org.example.javamusicapp.dto;
+package org.example.javamusicapp.controller.authController.dto;
 
 import lombok.Data;
 

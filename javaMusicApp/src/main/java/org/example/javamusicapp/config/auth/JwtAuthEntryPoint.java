@@ -1,4 +1,4 @@
-package org.example.javamusicapp.auth;
+package org.example.javamusicapp.config.auth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
