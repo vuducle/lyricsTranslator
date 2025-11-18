@@ -71,12 +71,12 @@ public class SecurityConfig {
                 .exceptionHandling(exc -> exc.authenticationEntryPoint(unauthorizedHandler))
                 // Add rate-limit filter before JWT filter so rate limiting applies early
                 .addFilterBefore(
-                    rateLimitFilter,
-                    JwtAuthenticationFilter.class)
+                        rateLimitFilter,
+                        JwtAuthenticationFilter.class)
                 // Add JWT filter before Spring Security's default authentication filter
                 .addFilterBefore(
-                    jwtAuthenticationFilter,
-                    UsernamePasswordAuthenticationFilter.class);
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
