@@ -6,6 +6,7 @@ import org.example.javamusicapp.repository.ToDoRepository;
 import org.example.javamusicapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -29,7 +30,16 @@ public class ToDoService {
         return toDoRepository.findById(id).orElse(null);
     }
 
-    public java.util.List<ToDo> findByUserUsername(String username) {
+    public List<ToDo> findByUserUsername(String username) {
         return toDoRepository.findByUserUsername(username);
+    }
+
+    public void deleteToDoIfOwner(UUID id, String username) {
+        ToDo toDo = toDoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ToDo not found: " + id));
+        if (toDo.getUser() == null || !username.equals(toDo.getUser().getUsername())) {
+            throw new SecurityException("Not authorized to delete this ToDo");
+        }
+        toDoRepository.delete(toDo);
     }
 }

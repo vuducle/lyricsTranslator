@@ -14,7 +14,7 @@ public interface ToDoRepository extends JpaRepository<ToDo, UUID> {
     Optional<ToDo> findByTitle(String title);
 
     List<ToDo> findByStatus(ETodo status);
-    
+
     // Find todos for a user by username
     List<ToDo> findByUserUsername(String username);
 }

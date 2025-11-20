@@ -19,7 +19,9 @@ import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.GetMapping;
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/todos")
@@ -81,5 +83,26 @@ public class ToDoController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a ToDo of current user", description = "Deletes the ToDo with given id if it belongs to the authenticated user", responses = {
+            @ApiResponse(responseCode = "204", description = "Deleted"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    public ResponseEntity<Void> deleteToDo(@PathVariable("id") UUID id, Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String username = principal.getName();
+        try {
+            toDoService.deleteToDoIfOwner(id, username);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (SecurityException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
 
 }
