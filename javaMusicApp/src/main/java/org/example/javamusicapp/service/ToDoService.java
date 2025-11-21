@@ -42,4 +42,46 @@ public class ToDoService {
         }
         toDoRepository.delete(toDo);
     }
+
+    public ToDo updateToDoIfOwner(java.util.UUID id,
+            org.example.javamusicapp.controller.todoContoller.dto.UpdateToDoRequest dto, String username) {
+        ToDo toDo = toDoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ToDo not found: " + id));
+        if (toDo.getUser() == null || !username.equals(toDo.getUser().getUsername())) {
+            throw new SecurityException("Not authorized to update this ToDo");
+        }
+
+        if (dto.getTitle() != null)
+            toDo.setTitle(dto.getTitle());
+        if (dto.getDescription() != null)
+            toDo.setDescription(dto.getDescription());
+        if (dto.getStatus() != null)
+            toDo.setStatus(dto.getStatus());
+
+        return toDoRepository.save(toDo);
+    }
+
+    // Full replace: require all fields from the client (no partial updates)
+    public ToDo replaceToDoIfOwner(java.util.UUID id,
+            org.example.javamusicapp.controller.todoContoller.dto.CreateToDoRequest dto, String username) {
+        ToDo toDo = toDoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ToDo not found: " + id));
+        if (toDo.getUser() == null || !username.equals(toDo.getUser().getUsername())) {
+            throw new SecurityException("Not authorized to replace this ToDo");
+        }
+
+        // Validate required fields for full replace
+        if (dto.getTitle() == null || dto.getTitle().isBlank()) {
+            throw new IllegalArgumentException("title is required");
+        }
+        if (dto.getStatus() == null) {
+            throw new IllegalArgumentException("status is required");
+        }
+
+        toDo.setTitle(dto.getTitle());
+        toDo.setDescription(dto.getDescription());
+        toDo.setStatus(dto.getStatus());
+
+        return toDoRepository.save(toDo);
+    }
 }

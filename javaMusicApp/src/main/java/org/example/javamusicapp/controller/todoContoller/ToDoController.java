@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.example.javamusicapp.controller.todoContoller.dto.UpdateToDoRequest;
 
 @RestController
 @RequestMapping("/api/todos")
@@ -98,6 +100,60 @@ public class ToDoController {
         try {
             toDoService.deleteToDoIfOwner(id, username);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (SecurityException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(summary = "Patch ToDo", description = "Partially update a ToDo owned by the authenticated user", responses = {
+            @ApiResponse(responseCode = "200", description = "Updated", content = @Content(schema = @Schema(implementation = ToDoResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    public ResponseEntity<ToDoResponse> patchToDo(@PathVariable("id") UUID id,
+            @org.springframework.web.bind.annotation.RequestBody UpdateToDoRequest request,
+            Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String username = principal.getName();
+        try {
+            ToDo updated = toDoService.updateToDoIfOwner(id, request, username);
+            ToDoResponse response = new ToDoResponse(
+                    updated.getId(), updated.getTitle(), updated.getDescription(), updated.getStatus(),
+                    updated.getUser().getId(), updated.getUser().getUsername());
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (SecurityException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @org.springframework.web.bind.annotation.PutMapping("/{id}")
+    @Operation(summary = "Replace ToDo", description = "Fully replace a ToDo owned by the authenticated user", responses = {
+            @ApiResponse(responseCode = "200", description = "Replaced", content = @Content(schema = @Schema(implementation = ToDoResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    public ResponseEntity<ToDoResponse> replaceToDo(@PathVariable("id") UUID id,
+            @org.springframework.web.bind.annotation.RequestBody CreateToDoRequest request,
+            Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String username = principal.getName();
+        try {
+            ToDo replaced = toDoService.replaceToDoIfOwner(id, request, username);
+            ToDoResponse response = new ToDoResponse(
+                    replaced.getId(), replaced.getTitle(), replaced.getDescription(), replaced.getStatus(),
+                    replaced.getUser().getId(), replaced.getUser().getUsername());
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (SecurityException e) {
