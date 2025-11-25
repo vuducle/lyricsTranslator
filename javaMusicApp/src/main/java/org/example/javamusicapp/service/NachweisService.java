@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -61,6 +62,11 @@ public class NachweisService {
         }
 
         return nachweisRepository.save(nachweis);
+    }
+
+    public List<Nachweis> getNachweiseByAzubiUsername(String username) {
+        User azubi = userService.findByUsername(username);
+        return nachweisRepository.findAllByAzubiId(azubi.getId());
     }
 
     private Activity createActivity(Weekday day, Integer slot, String description, BigDecimal hours, String section) {

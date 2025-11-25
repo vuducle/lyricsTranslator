@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.javamusicapp.controller.nachweisController.dto.CreateNachweisRequest;
 import org.example.javamusicapp.model.Nachweis;
@@ -28,12 +29,14 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/nachweise")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Nachweise", description = "API für die Verwaltung von Ausbildungsnachweisen")
 public class NachweisController {
 
     private final NachweisService nachweisService;
@@ -86,6 +89,16 @@ public class NachweisController {
             // Log the exception details
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/my-nachweise")
+    @Operation(summary = "Ruft alle Nachweise für den aktuell angemeldeten Azubi ab.",
+            description = "Gibt eine Liste aller Nachweise zurück, die dem aktuell authentifizierten Azubi gehören.")
+    @ApiResponse(responseCode = "200", description = "Liste der Nachweise erfolgreich abgerufen.")
+    @ApiResponse(responseCode = "403", description = "Zugriff verweigert, wenn der Benutzer nicht authentifiziert ist.")
+    public ResponseEntity<List<Nachweis>> getMyNachweise(@AuthenticationPrincipal UserDetails userDetails) {
+        List<Nachweis> nachweise = nachweisService.getNachweiseByAzubiUsername(userDetails.getUsername());
+        return ResponseEntity.ok(nachweise);
     }
 
     @GetMapping("/{id}/pdf")
