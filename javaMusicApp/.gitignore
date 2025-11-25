@@ -36,3 +36,4 @@ out/
 application.properties
 ### VS Code ###
 .vscode/
+generated_pdfs/

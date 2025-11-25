@@ -1,5 +1,6 @@
 package org.example.javamusicapp.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -46,6 +47,7 @@ public class Nachweis {
         private String signaturAzubi;
         private String signaturAusbilder;
 
+        @JsonManagedReference
         @OneToMany(mappedBy = "nachweis", cascade = CascadeType.ALL, orphanRemoval = true)
         private List<Activity> activities = new ArrayList<>();
 
