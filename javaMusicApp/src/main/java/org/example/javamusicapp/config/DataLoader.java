@@ -127,7 +127,7 @@ public class DataLoader implements CommandLineRunner {
             ausbilder.setId(ausbilderId);
             ausbilder.setUsername("sebastianreichenbach");
             ausbilder.setName("Sebastian Reichenbach");
-            ausbilder.setEmail("sebastian.reichenbach@example.com");
+            ausbilder.setEmail("vuducle97@gmail.com");
             ausbilder.setPassword(passwordEncoder.encode("SecurePassword123!"));
             ausbilder.setRoles(roles);
 

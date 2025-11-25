@@ -36,7 +36,7 @@ public class PdfExportService {
             setIfExists(form, "DatumStart", safeString(nachweis.getDatumStart()));
             setIfExists(form, "DatumEnde", safeString(nachweis.getDatumEnde()));
             setIfExists(form, "Nr", String.valueOf(nachweis.getNummer()));
-            setIfExists(form, "Ausbildungsjahr", null); // optional, set if you store this elsewhere
+            setIfExists(form, "Ausbildungsjahr", "2. Ausbildungsjahr"); // optional, set if you store this elsewhere
             setIfExists(form, "ListEvery", null);
             setIfExists(form, "Status", safeString(nachweis.getStatus()));
 

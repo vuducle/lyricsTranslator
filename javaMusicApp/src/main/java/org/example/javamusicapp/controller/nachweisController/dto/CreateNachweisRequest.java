@@ -20,4 +20,8 @@ public class CreateNachweisRequest {
     private List<ActivityDTO> activities;
     @Schema(description = "ID des Ausbilders. Wenn nicht angegeben, wird ein Standard-Ausbilder zugewiesen.", example = "e27590d3-657d-4feb-bd4e-1ffca3d7a884")
     private UUID ausbilderId;
+    @Schema(description = "E-Mail-Adresse des Ausbilders, an die der Nachweis gesendet werden soll", example = "ausbilder@example.com")
+    private String ausbilderEmail;
+    @Schema(description = "Das Ausbildungsjahr (z.B. '1. Ausbildungsjahr', '2. Ausbildungsjahr')", example = "2. Ausbildungsjahr")
+    private String ausbildungsjahr;
 }

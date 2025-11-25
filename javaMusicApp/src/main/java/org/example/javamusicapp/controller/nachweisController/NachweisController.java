@@ -63,6 +63,7 @@ public class NachweisController {
                                             "  \"datumEnde\": \"2025-11-28\",\n" +
                                             "  \"nummer\": 42,\n" +
                                             "  \"ausbilderId\": \"e27590d3-657d-4feb-bd4e-1ffca3d7a884\",\n" +
+                                            "  \"ausbildungsjahr\": \"2. Ausbildungsjahr\",\n" +
                                             "  \"activities\": []\n" +
                                             "}"
                             )

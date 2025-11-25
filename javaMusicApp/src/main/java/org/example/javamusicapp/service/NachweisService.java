@@ -29,6 +29,8 @@ public class NachweisService {
     private final NachweisRepository nachweisRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final EmailService emailService; // Inject EmailService
+    private final PdfExportService pdfExportService; // Inject PdfExportService
 
     private final Path rootLocation = Paths.get("generated_pdfs");
 
@@ -44,6 +46,7 @@ public class NachweisService {
         nachweis.setDatumStart(request.getDatumStart());
         nachweis.setDatumEnde(request.getDatumEnde());
         nachweis.setNummer(request.getNummer());
+        nachweis.setAusbildungsjahr(request.getAusbildungsjahr());
         nachweis.setAzubi(user);
         nachweis.setAusbilder(ausbilder);
         nachweis.setStatus(EStatus.IN_BEARBEITUNG);
@@ -70,7 +73,98 @@ public class NachweisService {
             });
         }
 
-        return nachweisRepository.save(nachweis);
+        Nachweis savedNachweis = nachweisRepository.save(nachweis); // Save first to get ID
+
+        try {
+            byte[] pdfBytes = pdfExportService.generateAusbildungsnachweisPdf(savedNachweis);
+            UUID userId = savedNachweis.getAzubi().getId();
+            UUID nachweisId = savedNachweis.getId();
+
+            Path userDirectory = rootLocation.resolve(userId.toString());
+            Files.createDirectories(userDirectory);
+            Path destinationFile = userDirectory.resolve(nachweisId.toString() + ".pdf");
+            Files.write(destinationFile, pdfBytes);
+
+            // Send email if ausbilder has an email
+            String ausbilderEmail = ausbilder.getEmail();
+            log.debug("Evaluating email sending for Nachweis {}. Ausbilder Email from user object: {}", savedNachweis.getId(), ausbilderEmail);
+            if (ausbilderEmail != null && !ausbilderEmail.isEmpty()) {
+                String ausbilderName = ausbilder.getName();
+                String azubiName = user.getName();
+                String nachweisNummer = String.valueOf(savedNachweis.getNummer());
+                String datumStartFormatted = "N/A";
+                String datumEndeFormatted = "N/A";
+                String ausbildungsjahr = "N/A";
+
+                if (savedNachweis.getDatumStart() != null) {
+                    datumStartFormatted = savedNachweis.getDatumStart().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+                } else {
+                    log.warn("DatumStart is null for Nachweis ID: {}", savedNachweis.getId());
+                }
+
+                if (savedNachweis.getDatumEnde() != null) {
+                    datumEndeFormatted = savedNachweis.getDatumEnde().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+                } else {
+                    log.warn("DatumEnde is null for Nachweis ID: {}", savedNachweis.getId());
+                }
+
+                if (savedNachweis.getAusbildungsjahr() != null && !savedNachweis.getAusbildungsjahr().isEmpty()) {
+                    ausbildungsjahr = savedNachweis.getAusbildungsjahr();
+                } else {
+                    log.warn("Ausbildungsjahr is null or empty for Nachweis ID: {}", savedNachweis.getId());
+                }
+
+                String subject = "Neuer Ausbildungsnachweis von " + azubiName;
+                String body = "<html>"
+                            + "<head>"
+                            + "<style>"
+                            + "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }"
+                            + ".container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; }"
+                            + ".header { background-color: #0056b3; color: #ffffff; padding: 10px 20px; text-align: center; border-radius: 5px 5px 0 0; }"
+                            + ".content { padding: 20px; }"
+                            + ".footer { text-align: center; font-size: 0.8em; color: #777; margin-top: 20px; }"
+                            + "p { margin-bottom: 10px; }"
+                            + "</style>"
+                            + "</head>"
+                            + "<body>"
+                            + "<div class='container'>"
+                            + "<div class='header'>"
+                            + "<h2>Neuer Ausbildungsnachweis</h2>"
+                            + "</div>"
+                            + "<div class='content'>"
+                            + "<p>Hallo " + ausbilderName + ",</p>"
+                            + "<p>hier ist der neue Ausbildungsnachweis von <strong>" + azubiName + "</strong>.</p>"
+                            + "<p><strong>Details zum Nachweis:</strong></p>"
+                            + "<ul>"
+                            + "<li><strong>Nummer:</strong> " + nachweisNummer + "</li>"
+                            + "<li><strong>Zeitraum:</strong> " + datumStartFormatted + " - " + datumEndeFormatted + "</li>"
+                            + "<li><strong>Ausbildungsjahr:</strong> " + ausbildungsjahr + "</li>"
+                            + "</ul>"
+                            + "<p>Den vollständigen Nachweis finden Sie / findest du im Anhang.</p>"
+                            + "<p>Mit freundlichen Grüßen,</p>"
+                            + "<p><strong>" + azubiName + "</strong></p>"
+                            + "</div>"
+                            + "<div class='footer'>"
+                            + "<p>Dies ist eine automatisch generierte E-Mail. Bitte antworten Sie nicht direkt auf diese Nachricht.</p>"
+                            + "</div>"
+                            + "</div>"
+                            + "</body>"
+                            + "</html>";
+                emailService.sendEmailWithAttachment(
+                    ausbilderEmail,
+                    subject,
+                    body,
+                    pdfBytes,
+                    "Ausbildungsnachweis_" + nachweisId + ".pdf",
+                    "application/pdf"
+                );
+            }
+
+            return savedNachweis;
+        } catch (IOException e) {
+            log.error("Fehler bei der PDF-Generierung oder Speicherung für Nachweis {}: {}", savedNachweis.getId(), e.getMessage());
+            throw new RuntimeException("Fehler bei der PDF-Generierung oder Speicherung", e);
+        }
     }
 
     public List<Nachweis> kriegeNachweiseVonAzubiBenutzername(String username) {

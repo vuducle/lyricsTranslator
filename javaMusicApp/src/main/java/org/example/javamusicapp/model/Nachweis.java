@@ -31,6 +31,8 @@ public class Nachweis {
 
         private int nummer;
 
+        private String Ausbildungsjahr;
+
         @Enumerated(EnumType.STRING)
         private EStatus status;
 
