@@ -35,8 +35,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Skip rate limiting for Swagger UI, API docs, and static resources
-        return path.startsWith("/swagger-ui") ||
+        // Skip rate limiting for auth, Swagger UI, API docs, and static resources
+        return path.startsWith("/api/auth/") ||
+                path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/webjars/") ||
                 path.equals("/swagger-ui.html");
