@@ -1,6 +1,7 @@
 package org.example.javamusicapp.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.javamusicapp.controller.nachweisController.dto.CreateNachweisRequest;
 import org.example.javamusicapp.model.Activity;
 import org.example.javamusicapp.model.Nachweis;
@@ -14,7 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.IOException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NachweisService {
@@ -23,12 +30,14 @@ public class NachweisService {
     private final UserService userService;
     private final UserRepository userRepository;
 
+    private final Path rootLocation = Paths.get("generated_pdfs");
+
     @Transactional
-    public Nachweis createNachweis(CreateNachweisRequest request, String username) {
+    public Nachweis erstelleNachweis(CreateNachweisRequest request, String username) {
         User user = userService.findByUsername(username);
         
         User ausbilder = userRepository.findById(request.getAusbilderId())
-                .orElseThrow(() -> new RuntimeException("Ausbilder not found"));
+                .orElseThrow(() -> new RuntimeException("Ausbilder nicht gefunden."));
 
         Nachweis nachweis = new Nachweis();
         nachweis.setName(user.getName());
@@ -64,9 +73,26 @@ public class NachweisService {
         return nachweisRepository.save(nachweis);
     }
 
-    public List<Nachweis> getNachweiseByAzubiUsername(String username) {
+    public List<Nachweis> kriegeNachweiseVonAzubiBenutzername(String username) {
         User azubi = userService.findByUsername(username);
         return nachweisRepository.findAllByAzubiId(azubi.getId());
+    }
+
+    @Transactional
+    public void loescheNachweis(UUID id) {
+        Nachweis nachweis = nachweisRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Nachweis mit der ID nicht gefunden: " + id));
+
+        try {
+            Path userDirectory = rootLocation.resolve(nachweis.getAzubi().getId().toString());
+            Path fileToDelete = userDirectory.resolve(nachweis.getId().toString() + ".pdf");
+            Files.deleteIfExists(fileToDelete);
+        } catch (IOException e) {
+            // Log the exception details, but don't prevent Nachweis deletion if PDF deletion fails
+            log.error("Fehler bei der Löschung der Nachweise {}: {}", id, e.getMessage());
+        }
+
+        nachweisRepository.deleteById(id);
     }
 
     private Activity createActivity(Weekday day, Integer slot, String description, BigDecimal hours, String section) {

@@ -72,7 +72,7 @@ public class NachweisController {
     @ApiResponse(responseCode = "201", description = "Nachweis erfolgreich erstellt.")
     @ApiResponse(responseCode = "500", description = "Interner Serverfehler bei der PDF-Generierung oder Speicherung.")
     public ResponseEntity<Nachweis> createNachweis(@RequestBody CreateNachweisRequest request, @AuthenticationPrincipal UserDetails userDetails) {
-        Nachweis nachweis = nachweisService.createNachweis(request, userDetails.getUsername());
+        Nachweis nachweis = nachweisService.erstelleNachweis(request, userDetails.getUsername());
 
         try {
             byte[] pdfBytes = pdfExportService.generateAusbildungsnachweisPdf(nachweis);
@@ -97,7 +97,7 @@ public class NachweisController {
     @ApiResponse(responseCode = "200", description = "Liste der Nachweise erfolgreich abgerufen.")
     @ApiResponse(responseCode = "403", description = "Zugriff verweigert, wenn der Benutzer nicht authentifiziert ist.")
     public ResponseEntity<List<Nachweis>> getMyNachweise(@AuthenticationPrincipal UserDetails userDetails) {
-        List<Nachweis> nachweise = nachweisService.getNachweiseByAzubiUsername(userDetails.getUsername());
+        List<Nachweis> nachweise = nachweisService.kriegeNachweiseVonAzubiBenutzername(userDetails.getUsername());
         return ResponseEntity.ok(nachweise);
     }
 
@@ -128,5 +128,17 @@ public class NachweisController {
         } catch (MalformedURLException e) {
             throw new RuntimeException("Error: " + e.getMessage());
         }
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Löscht einen Nachweis anhand seiner ID.",
+            description = "Löscht einen bestimmten Nachweis. Nur der Besitzer oder ein Admin kann einen Nachweis löschen.")
+    @ApiResponse(responseCode = "204", description = "Nachweis erfolgreich gelöscht.")
+    @ApiResponse(responseCode = "403", description = "Verboten - Sie sind nicht berechtigt, diesen Nachweis zu löschen.")
+    @ApiResponse(responseCode = "404", description = "Nachweis nicht gefunden.")
+    @PreAuthorize("hasRole('ADMIN') or @nachweisSecurityService.isOwner(authentication, #id)")
+    public ResponseEntity<Void> deleteNachweis(@PathVariable UUID id) {
+        nachweisService.loescheNachweis(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
