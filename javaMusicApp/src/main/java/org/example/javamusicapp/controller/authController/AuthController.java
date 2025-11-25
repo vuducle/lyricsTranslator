@@ -78,6 +78,7 @@ public class AuthController {
         // Neues User-Objekt erstellen
         User user = new User();
         user.setUsername(request.getUsername());
+        user.setName(request.getName());
         user.setEmail(request.getEmail());
 
         // Passwort hashen (WICHTIG!)

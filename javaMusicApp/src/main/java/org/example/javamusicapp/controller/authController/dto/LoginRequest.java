@@ -9,6 +9,9 @@ public class LoginRequest {
     @Schema(description = "Unique username of the user", example = "julianguyen")
     private String username;
 
+    @Schema(description = "User's full name", example = "Julian Nguyen")
+    private String name;
+
     @Schema(description = "User password", example = "password123", format = "password")
     private String password;
 
