@@ -1,4 +1,4 @@
-package org.example.javamusicapp.service;
+package org.example.javamusicapp.service.nachweis;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
@@ -13,8 +13,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.Locale;
-import java.util.Objects;
 
 @Service
 public class PdfExportService {

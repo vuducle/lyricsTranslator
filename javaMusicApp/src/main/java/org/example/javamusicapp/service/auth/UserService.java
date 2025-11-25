@@ -1,4 +1,4 @@
-package org.example.javamusicapp.service;
+package org.example.javamusicapp.service.auth;
 
 import org.example.javamusicapp.model.User;
 import org.example.javamusicapp.repository.UserRepository;
@@ -6,8 +6,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService {

@@ -1,4 +1,4 @@
-package org.example.javamusicapp.service;
+package org.example.javamusicapp.service.nachweis;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,7 @@ import org.example.javamusicapp.model.enums.EStatus;
 import org.example.javamusicapp.model.enums.Weekday;
 import org.example.javamusicapp.repository.NachweisRepository;
 import org.example.javamusicapp.repository.UserRepository;
+import org.example.javamusicapp.service.auth.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,4 +1,4 @@
-package org.example.javamusicapp.service;
+package org.example.javamusicapp.service.nachweis;
 
 import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;

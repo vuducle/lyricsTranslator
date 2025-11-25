@@ -1,4 +1,4 @@
-package org.example.javamusicapp.service;
+package org.example.javamusicapp.service.misc;
 
 import org.example.javamusicapp.model.ToDo;
 import org.example.javamusicapp.model.User;

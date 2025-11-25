@@ -1,4 +1,4 @@
-package org.example.javamusicapp.service;
+package org.example.javamusicapp.service.misc;
 
 import org.example.javamusicapp.controller.lyricsController.dto.DeepLReponseDTO;
 import org.example.javamusicapp.controller.lyricsController.dto.LyricsDTO;
@@ -10,9 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @Service
 public class LyricsService {

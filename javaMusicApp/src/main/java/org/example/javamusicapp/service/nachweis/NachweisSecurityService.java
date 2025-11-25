@@ -1,7 +1,6 @@
-package org.example.javamusicapp.service;
+package org.example.javamusicapp.service.nachweis;
 
 import lombok.RequiredArgsConstructor;
-import org.example.javamusicapp.model.Nachweis;
 import org.example.javamusicapp.repository.NachweisRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;

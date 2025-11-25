@@ -3,7 +3,7 @@ package org.example.javamusicapp.controller.todoContoller;
 import org.example.javamusicapp.controller.todoContoller.dto.CreateToDoRequest;
 import org.example.javamusicapp.controller.todoContoller.dto.ToDoResponse;
 import org.example.javamusicapp.model.ToDo;
-import org.example.javamusicapp.service.ToDoService;
+import org.example.javamusicapp.service.misc.ToDoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

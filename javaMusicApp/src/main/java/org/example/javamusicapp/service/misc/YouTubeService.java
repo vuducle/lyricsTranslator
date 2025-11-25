@@ -1,4 +1,4 @@
-package org.example.javamusicapp.service;
+package org.example.javamusicapp.service.misc;
 
 import org.jsoup.Jsoup;
 import org.jsoup.parser.Parser;

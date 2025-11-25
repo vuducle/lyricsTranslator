@@ -1,19 +1,16 @@
-package org.example.javamusicapp.service;
+package org.example.javamusicapp.service.auth;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.example.javamusicapp.controller.authController.dto.AuthResponse;
 import org.example.javamusicapp.handler.TokenRefreshException;
 import org.example.javamusicapp.model.RefreshToken;
 import org.example.javamusicapp.model.User;
 import org.example.javamusicapp.repository.RefreshTokenRepository;
 import org.example.javamusicapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
