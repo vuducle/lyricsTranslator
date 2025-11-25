@@ -12,6 +12,9 @@ public class AuthResponse {
     @Schema(description = "User's email address", example = "julianguyen@example.com")
     private String email;
 
+    @Schema(description = "User's full name", example = "Julian Nguyen")
+    private String name;
+
     @Schema(description = "JWT access token", example = "eyJhbGci...", accessMode = Schema.AccessMode.READ_ONLY)
     private String accessToken;
 

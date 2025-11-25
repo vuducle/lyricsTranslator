@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.javamusicapp.config.auth.JwtUtil;
 import org.example.javamusicapp.controller.authController.dto.AuthResponse;
 import org.example.javamusicapp.controller.authController.dto.LoginRequest;
+import org.example.javamusicapp.controller.authController.dto.RegistrationRequest;
 import org.example.javamusicapp.controller.authController.dto.TokenRefreshRequest;
 import org.example.javamusicapp.controller.authController.dto.TokenRefreshResponse;
 import org.example.javamusicapp.handler.TokenRefreshException;
@@ -64,7 +65,7 @@ public class AuthController {
     // --- 1. REGISTRIERUNG ---
     @PostMapping("/register")
     @Operation(summary = "Registriert einen neuen Benutzer", description = "Speichert den Benutzer mit gehashtem Passwort in PostgreSQL. Gibt 201 Created zurück.") // NEU
-    public ResponseEntity<?> registerUser(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> registerUser(@RequestBody RegistrationRequest request) {
 
         // Prüfung auf Duplikate (sauberer Code!)
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -116,6 +117,7 @@ public class AuthController {
             response.setRefreshToken(refreshToken.getToken());
             response.setUsername(userDetails.getUsername());
             response.setEmail(request.getEmail());
+            response.setName(((User) userDetails).getName());
 
             // Token im Format { "token": "DEIN_JWT_HIER", "username": "..." } zurücksenden
             return ResponseEntity.ok(response);
