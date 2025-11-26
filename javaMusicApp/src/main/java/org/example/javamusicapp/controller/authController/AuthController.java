@@ -2,22 +2,24 @@ package org.example.javamusicapp.controller.authController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.example.javamusicapp.config.auth.JwtUtil;
-import org.example.javamusicapp.controller.authController.dto.AuthResponse;
-import org.example.javamusicapp.controller.authController.dto.LoginRequest;
-import org.example.javamusicapp.controller.authController.dto.RegistrationRequest;
-import org.example.javamusicapp.controller.authController.dto.TokenRefreshRequest;
-import org.example.javamusicapp.controller.authController.dto.TokenRefreshResponse;
+import org.example.javamusicapp.controller.authController.dto.*;
+import org.example.javamusicapp.exception.ResourceNotFoundException;
 import org.example.javamusicapp.handler.TokenRefreshException;
+import org.example.javamusicapp.model.PasswordResetToken;
 import org.example.javamusicapp.model.RefreshToken;
 import org.example.javamusicapp.model.Role;
 import org.example.javamusicapp.model.User;
 import org.example.javamusicapp.model.enums.ERole;
 import org.example.javamusicapp.repository.RoleRepository;
 import org.example.javamusicapp.repository.UserRepository;
+import org.example.javamusicapp.service.auth.PasswordResetTokenService;
 import org.example.javamusicapp.service.auth.RefreshTokenService;
 import org.example.javamusicapp.service.auth.UserService;
+import org.example.javamusicapp.service.nachweis.EmailService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,12 +33,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Authentifizierung", description = "Registrierung, Login und Token-Verwaltung für die App-Sicherheit.") // NEU
+@Tag(name = "Authentifizierung", description = "Registrierung, Login und Token-Verwaltung für die App-Sicherheit.")
 public class AuthController {
-    // Spring injiziert alle notwendigen Komponenten
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -44,6 +47,9 @@ public class AuthController {
     private final UserService userService;
     private final RefreshTokenService refreshTokenService;
     private final RoleRepository roleRepository;
+    private final PasswordResetTokenService passwordResetTokenService;
+    private final EmailService emailService;
+    private final String frontendUrl;
 
     public AuthController(
             AuthenticationManager authenticationManager,
@@ -52,7 +58,10 @@ public class AuthController {
             JwtUtil jwtUtil,
             UserService userService,
             RefreshTokenService refreshTokenService,
-            RoleRepository roleRepository) {
+            RoleRepository roleRepository,
+            PasswordResetTokenService passwordResetTokenService,
+            EmailService emailService,
+            @Value("${app.frontend.url}") String frontendUrl) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -60,23 +69,20 @@ public class AuthController {
         this.userService = userService;
         this.refreshTokenService = refreshTokenService;
         this.roleRepository = roleRepository;
+        this.passwordResetTokenService = passwordResetTokenService;
+        this.emailService = emailService;
+        this.frontendUrl = frontendUrl;
     }
 
-    // --- 1. REGISTRIERUNG ---
     @PostMapping("/register")
-    @Operation(summary = "Registriert einen neuen Benutzer", description = "Speichert den Benutzer mit gehashtem Passwort in PostgreSQL. Gibt 201 Created zurück.") // NEU
+    @Operation(summary = "Registriert einen neuen Benutzer", description = "Speichert den Benutzer mit gehashtem Passwort in PostgreSQL. Gibt 201 Created zurück.")
     public ResponseEntity<?> registerUser(@RequestBody RegistrationRequest request) {
-
-        // Prüfung auf Duplikate (sauberer Code!)
         if (userRepository.existsByUsername(request.getUsername())) {
             return new ResponseEntity<>("Benutzername ist bereits vergeben!", HttpStatus.BAD_REQUEST);
         }
-
         if (userRepository.existsByEmail(request.getEmail())) {
             return new ResponseEntity<>("E-Mail wird bereits verwendet!", HttpStatus.BAD_REQUEST);
         }
-
-        // Neues User-Objekt erstellen
         User user = new User();
         user.setUsername(request.getUsername());
         user.setName(request.getName());
@@ -84,43 +90,31 @@ public class AuthController {
         user.setAusbildungsjahr(request.getAusbildungsjahr());
         user.setTelefonnummer(request.getTelefonnummer());
         user.setTeam(request.getTeam());
-
-        // Passwort hashen (WICHTIG!)
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-
         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                 .orElseThrow(() -> new RuntimeException("Fehler: Rolle nicht gefunden."));
         user.getRoles().add(userRole);
-
         userRepository.save(user);
-
         return new ResponseEntity<>("Benutzer erfolgreich registriert!", HttpStatus.CREATED);
     }
 
-    // --- 2. LOGIN ---
     @PostMapping("/login")
-    @Operation(summary = "Meldet Benutzer an", description = "Prüft Credentials, gibt bei Erfolg ein JWT-Token zurück, das für geschützte Endpunkte benötigt wird.") // NEU
+    @Operation(summary = "Meldet Benutzer an", description = "Prüft Credentials, gibt bei Erfolg ein JWT-Token zurück, das für geschützte Endpunkte benötigt wird.")
     public ResponseEntity<AuthResponse> authenticateUser(@RequestBody LoginRequest request) {
-
         try {
             User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new AuthenticationException("Benutzer mit E-Mail nicht gefunden: " + request.getEmail()) {});
-
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), request.getPassword()));
-
             UserDetails userDetails = userService.loadUserByUsername(user.getUsername());
-
             String token = jwtUtil.generateToken(userDetails);
             RefreshToken refreshToken = refreshTokenService.createRefreshToken((User) userDetails);
-
             AuthResponse response = new AuthResponse();
             response.setAccessToken(token);
             response.setRefreshToken(refreshToken.getToken());
             response.setUsername(userDetails.getUsername());
             response.setEmail(request.getEmail());
             response.setName(((User) userDetails).getName());
-
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
             log.error("Login Fehler: {}", e.getMessage());
@@ -128,36 +122,63 @@ public class AuthController {
         }
     }
 
-    // --- 3. Token erneuern ---
     @PostMapping("/refresh")
     @Operation(summary = "Erneuert den JWT Access Token", description = "Nimmt den langen Refresh Token entgegen, prüft ihn und gibt einen neuen Access Token aus.")
     public ResponseEntity<TokenRefreshResponse> refreshToken(@RequestBody TokenRefreshRequest request) {
-
         log.info("=== REFRESH ENDPOINT REACHED! Token: {}", request.getRefreshToken());
         String requestRefreshToken = request.getRefreshToken();
-
-        // 1. Suche den Token in Redis & prüfe dessen Ablaufdatum
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
-                // NEU: Hole die UserId aus dem RefreshToken-Objekt
                 .map(RefreshToken::getUserId)
-                // NEU: Verwende das UserRepository, um das vollständige User-Objekt aus
-                // PostgreSQL zu holen
-                .flatMap(userRepository::findById) // findById gibt Optional zurück, daher flatMap
-                .map(user -> { // 'user' ist jetzt das vollständige User-Objekt aus PostgreSQL
-
-                    // 2. Erstelle einen neuen Access Token
+                .flatMap(userRepository::findById)
+                .map(user -> {
                     String newAccessToken = jwtUtil.generateToken(user);
-
-                    // 3. Antworte mit neuem Access Token und altem Refresh Token
                     return ResponseEntity.ok(new TokenRefreshResponse(
                             newAccessToken,
                             requestRefreshToken,
                             user.getUsername(),
                             "Bearer "));
                 })
-                // Wenn userRepository.findById() fehlschlägt oder findByToken() fehlschlägt:
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
                         "Refresh Token ist ungültig oder Benutzer existiert nicht mehr!"));
+    }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Passwort zurücksetzen anfordern", description = "Sendet eine E-Mail mit einem Link zum Zurücksetzen des Passworts.")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        Optional<User> userOptional = userRepository.findByEmail(forgotPasswordRequest.getEmail());
+
+        if (userOptional.isEmpty()) {
+            // Return a generic message to avoid exposing whether an email is registered
+            return ResponseEntity.ok("Wenn ein Konto mit dieser E-Mail-Adresse existiert, wurde ein Link zum Zurücksetzen des Passworts gesendet.");
+        }
+
+        User user = userOptional.get();
+        PasswordResetToken token = passwordResetTokenService.createPasswordResetToken(user);
+
+        String resetLink = this.frontendUrl + "/reset-password?token=" + token.getToken();
+
+        emailService.sendPasswordResetEmail(user.getEmail(), user.getName(), resetLink);
+
+        log.info("Password reset link for user {} sent to {}", user.getUsername(), user.getEmail());
+
+        return ResponseEntity.ok("Wenn ein Konto mit dieser E-Mail-Adresse existiert, wurde ein Link zum Zurücksetzen des Passworts gesendet.");
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Passwort zurücksetzen", description = "Setzt das Passwort des Benutzers mit einem gültigen Token zurück.")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+        String token = resetPasswordRequest.getToken();
+        String newPassword = resetPasswordRequest.getNewPassword();
+
+        return passwordResetTokenService.findByToken(token)
+                .map(passwordResetTokenService::verifyExpiration)
+                .map(PasswordResetToken::getUser)
+                .map(user -> {
+                    userService.resetPassword(user, newPassword);
+                    passwordResetTokenService.deleteToken(token);
+                    return ResponseEntity.ok("Passwort wurde erfolgreich zurückgesetzt.");
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid token"));
     }
 }

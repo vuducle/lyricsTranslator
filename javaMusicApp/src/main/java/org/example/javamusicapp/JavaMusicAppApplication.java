@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
                 version="0.0.1",
                 description = "Backend-Service für für Allrounder Zwecker, Java beste!",
                 contact = @Contact(
-                        name = "Denis Kunz - Der beste Java-Entwickler in Berlin, Deutschland",
+                        name = "Denis Kunz - Der beste Java-Entwickler in Berlin, Deutschland2",
                         email = "deniskunz@example.com"
                 )
         )

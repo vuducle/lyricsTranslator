@@ -212,6 +212,12 @@ public class UserService implements UserDetailsService {
         log.info("Passwort geändert für User: {}", username);
     }
 
+    public void resetPassword(User user, String newPassword) {
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        log.info("Passwort zurückgesetzt für User: {}", user.getUsername());
+    }
+
     public User updateUserProfile(String username, org.example.javamusicapp.controller.userController.dto.UserUpdateRequest request) {
         User user = findByUsername(username);
         user.setAusbildungsjahr(request.getAusbildungsjahr());
