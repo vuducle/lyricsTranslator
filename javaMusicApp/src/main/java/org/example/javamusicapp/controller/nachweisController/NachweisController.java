@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.javamusicapp.controller.nachweisController.dto.CreateNachweisRequest;
 import org.example.javamusicapp.controller.nachweisController.dto.NachweisStatusUpdateRequest;
+import org.example.javamusicapp.model.enums.EStatus;
+import org.springframework.data.domain.Page;
 import org.example.javamusicapp.model.Nachweis;
 import org.example.javamusicapp.repository.NachweisRepository;
 import org.example.javamusicapp.service.nachweis.NachweisService;
@@ -94,12 +96,16 @@ public class NachweisController {
     }
 
     @GetMapping("/my-nachweise")
-    @Operation(summary = "Ruft alle Nachweise für den aktuell angemeldeten Azubi ab.",
-            description = "Gibt eine Liste aller Nachweise zurück, die dem aktuell authentifizierten Azubi gehören.")
+    @Operation(summary = "Ruft alle Nachweise für den aktuell angemeldeten Azubi ab, mit optionaler Filterung und Pagination.",
+            description = "Gibt eine Liste aller Nachweise zurück, die dem aktuell authentifizierten Azubi gehören. Kann nach Status gefiltert und paginiert werden.")
     @ApiResponse(responseCode = "200", description = "Liste der Nachweise erfolgreich abgerufen.")
     @ApiResponse(responseCode = "403", description = "Zugriff verweigert, wenn der Benutzer nicht authentifiziert ist.")
-    public ResponseEntity<List<Nachweis>> getMyNachweise(@AuthenticationPrincipal UserDetails userDetails) {
-        List<Nachweis> nachweise = nachweisService.kriegeNachweiseVonAzubiBenutzername(userDetails.getUsername());
+    public ResponseEntity<Page<Nachweis>> getMyNachweise(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) EStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<Nachweis> nachweise = nachweisService.kriegeNachweiseVonAzubiBenutzernameMitFilterUndPagination(userDetails.getUsername(), status, page, size);
         return ResponseEntity.ok(nachweise);
     }
 

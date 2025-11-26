@@ -13,6 +13,9 @@ import org.example.javamusicapp.repository.UserRepository;
 import org.example.javamusicapp.service.auth.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -179,6 +182,17 @@ public class NachweisService {
 
     public List<Nachweis> findNachweiseByUserId(UUID userId) {
         return nachweisRepository.findAllByAzubiId(userId);
+    }
+
+    public Page<Nachweis> kriegeNachweiseVonAzubiBenutzernameMitFilterUndPagination(String username, EStatus status, int page, int size) {
+        User azubi = userService.findByUsername(username);
+        Pageable pageable = PageRequest.of(page, size);
+
+        if (status != null) {
+            return nachweisRepository.findAllByAzubiIdAndStatus(azubi.getId(), status, pageable);
+        } else {
+            return nachweisRepository.findAllByAzubiId(azubi.getId(), pageable);
+        }
     }
 
     @Transactional
