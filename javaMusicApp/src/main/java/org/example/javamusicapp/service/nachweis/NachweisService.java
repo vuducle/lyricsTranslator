@@ -135,35 +135,39 @@ public class NachweisService {
                 String subject = "Neuer Ausbildungsnachweis von " + azubiName;
                 String body = "<html>"
                         + "<head>"
+                        + "<meta charset='utf-8'/>"
                         + "<style>"
-                        + "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }"
-                        + ".container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; }"
-                        + ".header { background-color: #0056b3; color: #ffffff; padding: 10px 20px; text-align: center; border-radius: 5px 5px 0 0; }"
-                        + ".content { padding: 20px; }"
-                        + ".footer { text-align: center; font-size: 0.8em; color: #777; margin-top: 20px; }"
-                        + "p { margin-bottom: 10px; }"
+                        + "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; color: #0f172a; line-height:1.5;}"
+                        + ".container { max-width:640px; margin:0 auto; padding:20px; border-radius:12px; background:#fff; box-shadow:0 6px 20px rgba(16,24,40,0.06);}"
+                        + ".header { background: linear-gradient(90deg,#1DB954 0%,#16a34a 100%); color:#fff; padding:18px; text-align:center; border-radius:10px 10px 0 0;}"
+                        + ".content { padding:20px; color:#0f172a;}"
+                        + ".muted { color:#64748b; font-size:0.9em; }"
+                        + ".btn { display:inline-block; background:#1DB954; color:#fff; padding:10px 16px; border-radius:999px; text-decoration:none; font-weight:600; }"
+                        + "ul { margin:8px 0 12px 18px; }"
                         + "</style>"
                         + "</head>"
                         + "<body>"
                         + "<div class='container'>"
                         + "<div class='header'>"
-                        + "<h2>Neuer Ausbildungsnachweis</h2>"
+                        + "<h2 style='margin:0;font-size:18px;'>Neuer Nachweis eingereicht</h2>"
                         + "</div>"
                         + "<div class='content'>"
-                        + "<p>Hallo " + ausbilderName + ",</p>"
-                        + "<p>hier ist der neue Ausbildungsnachweis von <strong>" + azubiName + "</strong>.</p>"
-                        + "<p><strong>Details zum Nachweis:</strong></p>"
+                        + "<p>Hey " + ausbilderName + " 👋</p>"
+                        + "<p>Dein Azubi <strong>" + azubiName
+                        + "</strong> hat einen neuen Ausbildungsnachweis eingereicht.</p>"
+                        + "<p><strong>Kurzinfo</strong></p>"
                         + "<ul>"
                         + "<li><strong>Nummer:</strong> " + nachweisNummer + "</li>"
                         + "<li><strong>Zeitraum:</strong> " + datumStartFormatted + " - " + datumEndeFormatted + "</li>"
                         + "<li><strong>Ausbildungsjahr:</strong> " + ausbildungsjahr + "</li>"
                         + "</ul>"
-                        + "<p>Den vollständigen Nachweis finden Sie / findest du im Anhang.</p>"
-                        + "<p>Mit freundlichen Grüßen,</p>"
-                        + "<p><strong>" + azubiName + "</strong></p>"
+                        + "<p class='muted'>Den kompletten Nachweis findest du als PDF im Anhang.</p>"
+                        + "<p>Danke & beste Grüße,<br/>" + azubiName + "</p>"
                         + "</div>"
-                        + "<div class='footer'>"
-                        + "<p>Dies ist eine automatisch generierte E-Mail. Bitte antworten Sie nicht direkt auf diese Nachricht.</p>"
+                        + "<div style='padding:12px;text-align:center;color:#94a3b8;font-size:12px;'>"
+                        + "Automatisch generierte Nachricht — bitte nicht direkt antworten."
+                        + "<p style='text-align:center;margin:14px 0;'><a class='btn' href='https://github.com/vuducle/javaSpringBootApp/' target='_blank' rel='noopener'>Quellcode ansehen</a></p>"
+                        + "<p>Mit viel Liebe mit Java gecodet ❤\uFE0F\uD83C\uDDEE\uD83C\uDDE9\uD83C\uDDFB\uD83C\uDDF3☕\uFE0F</p>"
                         + "</div>"
                         + "</div>"
                         + "</body>"
@@ -332,42 +336,110 @@ public class NachweisService {
         // Send email to Azubi about status update
         User azubi = updatedNachweis.getAzubi();
         if (azubi != null && azubi.getEmail() != null && !azubi.getEmail().isEmpty()) {
-            String subject = "Update zu deinem Ausbildungsnachweis Nr. " + updatedNachweis.getNummer();
-            String body = "<html>"
-                    + "<head>"
-                    + "<style>"
-                    + "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }"
-                    + ".container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; }"
-                    + ".header { background-color: #0056b3; color: #ffffff; padding: 10px 20px; text-align: center; border-radius: 5px 5px 0 0; }"
-                    + ".content { padding: 20px; }"
-                    + ".footer { text-align: center; font-size: 0.8em; color: #777; margin-top: 20px; }"
-                    + "p { margin-bottom: 10px; }"
-                    + "strong { color: #0056b3; }"
-                    + "</style>"
-                    + "</head>"
-                    + "<body>"
-                    + "<div class='container'>"
-                    + "<div class='header'>"
-                    + "<h2>Status-Update deines Ausbildungsnachweises</h2>"
-                    + "</div>"
-                    + "<div class='content'>"
-                    + "<p>Hallo " + azubi.getName() + ",</p>"
-                    + "<p>der Status deines Ausbildungsnachweises Nr. <strong>" + updatedNachweis.getNummer()
-                    + "</strong> wurde aktualisiert.</p>"
-                    + "<p>Neuer Status: <strong>" + neuerStatus.toString() + "</strong></p>"
-                    + (comment != null && !comment.isEmpty()
-                            ? "<p>Kommentar deines Ausbilders: <em>" + comment + "</em></p>"
-                            : "")
-                    + "<p>Mit freundlichen Grüßen,</p>"
-                    + "<p>Dein Ausbilder/in " + updatedNachweis.getAusbilder().getName() + "</p>"
-                    + "</div>"
-                    + "<div class='footer'>"
-                    + "<p>Dies ist eine automatisch generierte E-Mail. Bitte antworten Sie nicht direkt auf diese Nachricht.</p>"
-                    + "</div>"
-                    + "</div>"
-                    + "</body>"
-                    + "</html>";
-            emailService.sendEmail(azubi.getEmail(), subject, body);
+            if (neuerStatus == EStatus.ANGENOMMEN) {
+                // Send an acceptance email and attach the generated PDF if available
+                String subject = "Dein Ausbildungsnachweis Nr. " + updatedNachweis.getNummer() + " wurde angenommen";
+                String body = "<html>"
+                        + "<head>"
+                        + "<meta charset='utf-8'/>"
+                        + "<style>"
+                        + "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; line-height: 1.5; color: #0f172a; }"
+                        + ".container { max-width: 640px; margin: 0 auto; padding: 20px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 6px 20px rgba(16,24,40,0.06); }"
+                        + ".header { background: linear-gradient(90deg, #1DB954 0%, #16a34a 100%); color: #ffffff; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }"
+                        + ".content { padding: 22px; color: #0f172a; }"
+                        + ".footer { text-align: center; font-size: 0.85em; color: #64748b; margin-top: 18px; }"
+                        + ".cta { display: inline-block; padding: 10px 18px; background: #1DB954; color: #fff; border-radius: 999px; text-decoration: none; font-weight: 600; }"
+                        + ".btn { display:inline-block; background:#1DB954; color:#fff; padding:10px 16px; border-radius:999px; text-decoration:none; font-weight:600; }"
+                        + "p { margin: 0 0 12px 0; }"
+                        + "</style>"
+                        + "</head>"
+                        + "<body>"
+                        + "<div class='container'>"
+                        + "<div class='header'>"
+                        + "<h2 style='margin:0;font-size:20px;'>Nice — dein Nachweis ist angenommen 🎉</h2>"
+                        + "</div>"
+                        + "<div class='content'>"
+                        + "<p>Hallo " + azubi.getName() + ",</p>"
+                        + "<p>dein Ausbildungsnachweis Nr. <strong>" + updatedNachweis.getNummer()
+                        + "</strong> wurde von deinem Ausbilder angenommen.</p>"
+                        + "<p>Herzlichen Glückwunsch! Du findest den Nachweis im Anhang dieser E-Mail.</p>"
+                        + "<p>Mit freundlichen Grüßen,</p>"
+                        + "<p>Dein Ausbilder/in " + updatedNachweis.getAusbilder().getName() + "</p>"
+                        + "</div>"
+                        + "<div class='footer'>"
+                        + "<p>Dies ist eine automatisch generierte E-Mail. Bitte antworte nicht direkt auf diese Nachricht.</p>"
+                        + "<p style='text-align:center;margin:14px 0;'><a class='btn' href='https://github.com/vuducle/javaSpringBootApp/' target='_blank' rel='noopener'>Quellcode ansehen</a></p>"
+                        + "<p>Mit viel Liebe mit Java gecodet ❤\uFE0F\uD83C\uDDEE\uD83C\uDDE9\uD83C\uDDFB\uD83C\uDDF3☕\uFE0F</p>"
+                        + "</div>"
+                        + "</div>"
+                        + "</body>"
+                        + "</html>";
+
+                // Try to attach the PDF if it exists
+                try {
+                    String userVollerName = azubi.getName().toLowerCase().replaceAll(" ", "_");
+                    Path userDirectory = rootLocation.resolve(userVollerName + "_" + azubi.getId().toString());
+                    Path file = userDirectory.resolve(updatedNachweis.getId().toString() + ".pdf");
+                    if (Files.exists(file) && Files.isReadable(file)) {
+                        byte[] pdfBytes = Files.readAllBytes(file);
+                        emailService.sendEmailWithAttachment(
+                                azubi.getEmail(),
+                                subject,
+                                body,
+                                pdfBytes,
+                                "Ausbildungsnachweis_" + updatedNachweis.getId() + ".pdf",
+                                "application/pdf");
+                    } else {
+                        log.warn("PDF for Nachweis {} not found to attach to acceptance email: {}",
+                                updatedNachweis.getId(), file);
+                        emailService.sendEmail(azubi.getEmail(), subject, body);
+                    }
+                } catch (IOException e) {
+                    log.error("Fehler beim Lesen der PDF für Nachweis {}: {}", updatedNachweis.getId(), e.getMessage());
+                    // Fallback to sending email without attachment
+                    emailService.sendEmail(azubi.getEmail(), subject, body);
+                }
+            } else {
+                String subject = "Update zu deinem Ausbildungsnachweis Nr. " + updatedNachweis.getNummer();
+                String body = "<html>"
+                        + "<head>"
+                        + "<meta charset='utf-8'/>"
+                        + "<style>"
+                        + "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; line-height: 1.5; color: #0f172a; }"
+                        + ".container { max-width: 640px; margin: 0 auto; padding: 20px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 6px 20px rgba(16,24,40,0.06); }"
+                        + ".header { background: linear-gradient(90deg, #1DB954 0%, #16a34a 100%); color: #ffffff; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }"
+                        + ".content { padding: 22px; color: #0f172a; }"
+                        + ".footer { text-align: center; font-size: 0.85em; color: #64748b; margin-top: 18px; }"
+                        + "p { margin: 0 0 12px 0; }"
+                        + "strong { color: #065f46; }"
+                        + "</style>"
+                        + "</head>"
+                        + "<body>"
+                        + "<div class='container'>"
+                        + "<div class='header'>"
+                        + "<h2 style='margin:0;font-size:20px;'>Update zu deinem Nachweis</h2>"
+                        + "</div>"
+                        + "<div class='content'>"
+                        + "<p>Hallo " + azubi.getName() + ",</p>"
+                        + "<p>der Status deines Ausbildungsnachweises Nr. <strong>" + updatedNachweis.getNummer()
+                        + "</strong> wurde aktualisiert.</p>"
+                        + "<p>Neuer Status: <strong>" + neuerStatus.toString() + "</strong></p>"
+                        + (comment != null && !comment.isEmpty()
+                                ? "<p>Kommentar deines Ausbilders: <em>" + comment + "</em></p>"
+                                : "")
+                        + "<p>Mit freundlichen Grüßen,</p>"
+                        + "<p>Dein Ausbilder/in " + updatedNachweis.getAusbilder().getName() + "</p>"
+                        + "</div>"
+                        + "<div class='footer'>"
+                        + "<p>Dies ist eine automatisch generierte E-Mail. Bitte antworten Sie nicht direkt auf diese Nachricht.</p>"
+                        + "<p style='text-align:center;margin:14px 0;'><a class='btn' href='https://github.com/vuducle/javaSpringBootApp/' target='_blank' rel='noopener'>Quellcode ansehen</a></p>"
+                        + "<p>Mit viel Liebe mit Java gecodet ❤\uFE0F\uD83C\uDDEE\uD83C\uDDE9\uD83C\uDDFB\uD83C\uDDF3☕\uFE0F</p>"
+                        + "</div>"
+                        + "</div>"
+                        + "</body>"
+                        + "</html>";
+                emailService.sendEmail(azubi.getEmail(), subject, body);
+            }
         }
         return updatedNachweis;
     }
@@ -440,36 +512,41 @@ public class NachweisService {
             User nachweisAusbilder = updatedNachweis.getAusbilder();
             if (nachweisAusbilder != null && nachweisAusbilder.getEmail() != null
                     && !nachweisAusbilder.getEmail().isEmpty()) {
-                String subject = "Ausbildungsnachweis Nr. " + updatedNachweis.getNummer() + " von " + azubi.getName()
-                        + " wurde aktualisiert";
+                String subject = "Nachweis aktualisiert: Nr. " + updatedNachweis.getNummer() + " von "
+                        + azubi.getName();
                 String body = "<html>"
                         + "<head>"
+                        + "<meta charset='utf-8'/>"
                         + "<style>"
-                        + "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }"
-                        + ".container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; }"
-                        + ".header { background-color: #0056b3; color: #ffffff; padding: 10px 20px; text-align: center; border-radius: 5px 5px 0 0; }"
-                        + ".content { padding: 20px; }"
-                        + ".footer { text-align: center; font-size: 0.8em; color: #777; margin-top: 20px; }"
-                        + "p { margin-bottom: 10px; }"
-                        + "strong { color: #0056b3; }"
+                        + "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; line-height: 1.5; color: #0f172a; }"
+                        + ".container { max-width: 640px; margin: 0 auto; padding: 20px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 6px 20px rgba(16,24,40,0.06); }"
+                        + ".header { background: linear-gradient(90deg, #1DB954 0%, #16a34a 100%); color: #ffffff; padding: 18px; text-align: center; border-radius: 10px 10px 0 0; }"
+                        + ".content { padding: 20px; color: #0f172a; }"
+                        + ".note { background: #f1fdf6; color: #064e3b; padding: 12px; border-radius: 8px; margin: 12px 0; }"
+                        + ".footer { text-align: center; font-size: 0.85em; color: #64748b; margin-top: 16px; }"
+                        + "p { margin: 0 0 12px 0; }"
                         + "</style>"
                         + "</head>"
                         + "<body>"
                         + "<div class='container'>"
                         + "<div class='header'>"
-                        + "<h2>Ausbildungsnachweis aktualisiert und zur Prüfung bereit</h2>"
+                        + "<h2 style='margin:0;font-size:18px;'>Ausbildungsnachweis aktualisiert — bitte prüfen</h2>"
                         + "</div>"
                         + "<div class='content'>"
-                        + "<p>Hallo " + nachweisAusbilder.getName() + ",</p>"
-                        + "<p>der Ausbildungsnachweis Nr. <strong>" + updatedNachweis.getNummer()
-                        + "</strong> von <strong>" + azubi.getName() + "</strong> wurde aktualisiert.</p>"
-                        + "<p>Er befindet sich nun wieder im Status: <strong>" + EStatus.IN_BEARBEITUNG.toString()
-                        + "</strong> und wartet auf deine erneute Prüfung.</p>"
-                        + "<p>Mit freundlichen Grüßen,</p>"
-                        + "<p>Dein Spring Boot System</p>"
+                        + "<p>Hi " + nachweisAusbilder.getName() + " 👋</p>"
+                        + "<p>Der Nachweis <strong>Nr. " + updatedNachweis.getNummer() + "</strong> von <strong>"
+                        + azubi.getName() + "</strong> wurde aktualisiert und ist wieder zur Prüfung bereit.</p>"
+                        + (EStatus.IN_BEARBEITUNG != null
+                                ? "<p class='note'>Status: <strong>" + EStatus.IN_BEARBEITUNG.toString()
+                                        + "</strong></p>"
+                                : "")
+                        + "<p>Kurz checken, kurz freigeben — danke! 🙏</p>"
+                        + "<p>Beste Grüße,<br/>" + azubi.getName() + "</p>"
                         + "</div>"
                         + "<div class='footer'>"
-                        + "<p>Dies ist eine automatisch generierte E-Mail. Bitte antworten Sie nicht direkt auf diese Nachricht.</p>"
+                        + "<p style='text-align:center;margin:14px 0;'><a class='btn' href='https://github.com/vuducle/javaSpringBootApp/tree/main/src/main/java' target='_blank' rel='noopener'>Quellcode ansehen</a></p>"
+                        + "<p>Mit viel Liebe mit Java gecodet ❤\uFE0F\uD83C\uDDEE\uD83C\uDDE9\uD83C\uDDFB\uD83C\uDDF3☕\uFE0F</p>"
+                        + "<p>Automatisch generierte Nachricht — Antworten werden nicht überwacht.</p>"
                         + "</div>"
                         + "</div>"
                         + "</body>"
