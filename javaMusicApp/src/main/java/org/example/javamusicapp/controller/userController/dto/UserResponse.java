@@ -15,4 +15,7 @@ public class UserResponse {
     private String name;
     private String email;
     private String profileImageUrl;
+    private Integer ausbildungsjahr;
+    private String telefonnummer;
+    private String team;
 }

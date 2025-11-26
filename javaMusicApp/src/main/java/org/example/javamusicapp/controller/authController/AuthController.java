@@ -81,6 +81,9 @@ public class AuthController {
         user.setUsername(request.getUsername());
         user.setName(request.getName());
         user.setEmail(request.getEmail());
+        user.setAusbildungsjahr(request.getAusbildungsjahr());
+        user.setTelefonnummer(request.getTelefonnummer());
+        user.setTeam(request.getTeam());
 
         // Passwort hashen (WICHTIG!)
         user.setPassword(passwordEncoder.encode(request.getPassword()));

@@ -212,6 +212,15 @@ public class UserService implements UserDetailsService {
         log.info("Passwort geändert für User: {}", username);
     }
 
+    public User updateUserProfile(String username, org.example.javamusicapp.controller.userController.dto.UserUpdateRequest request) {
+        User user = findByUsername(username);
+        user.setAusbildungsjahr(request.getAusbildungsjahr());
+        user.setTelefonnummer(request.getTelefonnummer());
+        user.setTeam(request.getTeam());
+        return userRepository.save(user);
+    }
+
+
     /*
      * Lädt ein Profilbild für den angegebenen User hoch, skaliert es bei Bedarf und
      * speichert es im Dateisystem.

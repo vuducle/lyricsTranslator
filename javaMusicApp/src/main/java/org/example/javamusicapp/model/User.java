@@ -31,6 +31,10 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String name;
 
+    private Integer ausbildungsjahr;
+    private String telefonnummer;
+    private String team;
+
     @Column(nullable = false)
     private String password;
     private String email;

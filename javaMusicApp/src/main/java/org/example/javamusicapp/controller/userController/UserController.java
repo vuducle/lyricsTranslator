@@ -58,11 +58,23 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') or @nachweisSecurityService.isAusbilder(authentication)")
     public ResponseEntity<java.util.List<UserResponse>> listAdmins(Authentication authentication) {
         java.util.List<User> admins = userService.listAdmins();
-        java.util.List<UserResponse> resp = new java.util.ArrayList<>();
-        for (User u : admins) {
-            resp.add(new UserResponse(u.getId(), u.getUsername(), u.getName(), u.getEmail(), u.getProfileImageUrl()));
-        }
+        java.util.List<UserResponse> resp = admins.stream()
+                .map(this::toUserResponse)
+                .collect(java.util.stream.Collectors.toList());
         return ResponseEntity.ok(resp);
+    }
+
+    private UserResponse toUserResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getName(),
+                user.getEmail(),
+                user.getProfileImageUrl(),
+                user.getAusbildungsjahr(),
+                user.getTelefonnummer(),
+                user.getTeam()
+        );
     }
 
     @Operation(summary = "Profilbild hochladen", description = "Lädt ein Profilbild für den aktuell angemeldeten User hoch")
@@ -74,12 +86,7 @@ public class UserController {
             String username = authentication.getName();
             User updatedUser = userService.uploadProfileImage(username, file);
 
-            UserResponse response = new UserResponse(
-                    updatedUser.getId(),
-                    updatedUser.getUsername(),
-                    updatedUser.getName(),
-                    updatedUser.getEmail(),
-                    updatedUser.getProfileImageUrl());
+            UserResponse response = toUserResponse(updatedUser);
 
             log.info("Profilbild erfolgreich hochgeladen für User: {}", username);
             return ResponseEntity.ok(response);
@@ -95,13 +102,19 @@ public class UserController {
         String username = authentication.getName();
         User user = userService.findByUsername(username);
 
-        UserResponse response = new UserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getName(),
-                user.getEmail(),
-                user.getProfileImageUrl());
+        UserResponse response = toUserResponse(user);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "User-Profil aktualisieren", description = "Aktualisiert das Profil des aktuell angemeldeten Users")
+    @PutMapping("/profile")
+    public ResponseEntity<UserResponse> updateUserProfile(
+            @RequestBody org.example.javamusicapp.controller.userController.dto.UserUpdateRequest request,
+            Authentication authentication) {
+        String username = authentication.getName();
+        User updatedUser = userService.updateUserProfile(username, request);
+        UserResponse response = toUserResponse(updatedUser);
         return ResponseEntity.ok(response);
     }
 
@@ -112,12 +125,7 @@ public class UserController {
             String username = authentication.getName();
             User updatedUser = userService.deleteProfileImage(username);
 
-            UserResponse response = new UserResponse(
-                    updatedUser.getId(),
-                    updatedUser.getUsername(),
-                    updatedUser.getName(),
-                    updatedUser.getEmail(),
-                    updatedUser.getProfileImageUrl());
+            UserResponse response = toUserResponse(updatedUser);
 
             log.info("Profilbild erfolgreich gelöscht für User: {}", username);
             return ResponseEntity.ok(response);
