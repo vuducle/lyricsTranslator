@@ -148,7 +148,8 @@ public class UserController {
     @DeleteMapping("/{username}/revoke-admin")
     @PreAuthorize("hasRole('ADMIN') or @nachweisSecurityService.isAusbilder(authentication)")
     public ResponseEntity<String> revokeAdmin(@PathVariable("username") String username,
-            Authentication authentication) {
+            Authentication authentication,
+            @org.springframework.web.bind.annotation.RequestParam(value = "keepAsNoRole", defaultValue = "false") boolean keepAsNoRole) {
         try {
             // Prevent self-revoke in specific cases:
             // - if caller is ADMIN -> prevent self-revoke
@@ -170,7 +171,7 @@ public class UserController {
             }
 
             String caller = (authentication != null) ? authentication.getName() : "system";
-            userService.revokeAdminRoleFromUser(username, caller);
+            userService.revokeAdminRoleFromUser(username, caller, keepAsNoRole);
             return ResponseEntity.ok("ROLE_ADMIN erfolgreich entzogen von " + username);
         } catch (IllegalArgumentException e) {
             log.warn("Revoke admin fehlgeschlagen: {}", e.getMessage());

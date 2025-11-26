@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.javamusicapp.model.RoleAudit;
 import org.example.javamusicapp.service.audit.RoleAuditService;
 import org.example.javamusicapp.service.nachweis.NachweisSecurityService;
+import org.example.javamusicapp.service.auth.UserService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +28,7 @@ public class RoleAuditController {
 
     private final RoleAuditService roleAuditService;
     private final NachweisSecurityService nachweisSecurityService;
+    private final UserService userService;
 
     @Operation(summary = "Rollen-Audit", description = "Listet Einträge zu Rollen-Zuweisungen und -Entfernungen")
     @GetMapping("/rollen-audit")
@@ -44,6 +46,18 @@ public class RoleAuditController {
         sichtbareGruppen.add("Users (Azubis)");
         sichtbareGruppen.add("Admins (Ausbilder)");
         resp.put("sichtbareGruppen", sichtbareGruppen);
+
+        // Zusätzlich: tatsächliche User-Listen für die Gruppen
+        try {
+            java.util.List<String> azubis = userService
+                    .listUsernamesByRole(org.example.javamusicapp.model.enums.ERole.ROLE_USER);
+            java.util.List<String> ausbilder = userService
+                    .listUsernamesByRole(org.example.javamusicapp.model.enums.ERole.ROLE_ADMIN);
+            resp.put("azubis", azubis);
+            resp.put("ausbilder", ausbilder);
+        } catch (Exception e) {
+            log.warn("Konnte Benutzerlisten für Audit nicht laden: {}", e.getMessage());
+        }
 
         return ResponseEntity.ok(resp);
     }

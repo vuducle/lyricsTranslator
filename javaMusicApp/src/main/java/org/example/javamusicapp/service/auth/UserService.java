@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 import java.util.UUID;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -99,6 +100,19 @@ public class UserService implements UserDetailsService {
     }
 
     public void revokeAdminRoleFromUser(String targetUsername, String performedBy) {
+        // backwards-compatible: keepAsNoRole = false (assign ROLE_USER if missing)
+        revokeAdminRoleFromUser(targetUsername, performedBy, false);
+    }
+
+    /**
+     * Revoke ROLE_ADMIN from a user.
+     * 
+     * @param targetUsername target user
+     * @param performedBy    who performed the action (for audit)
+     * @param keepAsNoRole   if true, do not auto-assign ROLE_USER after revoke; if
+     *                       false, assign ROLE_USER when missing
+     */
+    public void revokeAdminRoleFromUser(String targetUsername, String performedBy, boolean keepAsNoRole) {
         User target = userRepository.findByUsername(targetUsername)
                 .orElseThrow(() -> new IllegalArgumentException("Zielbenutzer nicht gefunden: " + targetUsername));
 
@@ -126,11 +140,41 @@ public class UserService implements UserDetailsService {
             } catch (Exception e) {
                 log.warn("Audit-Eintrag konnte nicht geschrieben werden: {}", e.getMessage());
             }
+
+            if (!keepAsNoRole) {
+                // Wenn der User danach keine ROLE_USER hat, setzen wir ihn als Azubi
+                // (ROLE_USER).
+                boolean hasUserRole = target.getRoles().stream().anyMatch(r -> r.getName() == ERole.ROLE_USER);
+                if (!hasUserRole) {
+                    try {
+                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                                .orElseThrow(() -> new IllegalStateException("ROLE_USER ist nicht konfiguriert"));
+                        target.getRoles().add(userRole);
+                        userRepository.save(target);
+                        log.info("ROLE_USER automatisch zugewiesen an User: {} (nach Entzug von ADMIN)",
+                                targetUsername);
+                        try {
+                            roleAuditService.record("GRANT", targetUsername, performedBy,
+                                    "Assigned ROLE_USER after ADMIN revoke");
+                        } catch (Exception e) {
+                            log.warn("Audit-Eintrag konnte nicht geschrieben werden: {}", e.getMessage());
+                        }
+                    } catch (Exception e) {
+                        log.warn("Konnte ROLE_USER nicht automatisch zuweisen: {}", e.getMessage());
+                    }
+                }
+            } else {
+                log.info("keepAsNoRole=true: keine automatische Zuweisung von ROLE_USER für {}", targetUsername);
+            }
         }
     }
 
     public java.util.List<User> listAdmins() {
         return userRepository.findAllByRoles_Name(ERole.ROLE_ADMIN);
+    }
+
+    public java.util.List<String> listUsernamesByRole(ERole role) {
+        return userRepository.findAllByRoles_Name(role).stream().map(User::getUsername).collect(Collectors.toList());
     }
 
     public boolean isAdmin(String username) {
