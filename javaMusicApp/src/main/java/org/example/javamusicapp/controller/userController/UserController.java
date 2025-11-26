@@ -53,6 +53,18 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Admin-Liste", description = "Gibt alle aktuellen Admin-User zurück")
+    @GetMapping("/admins")
+    @PreAuthorize("hasRole('ADMIN') or @nachweisSecurityService.isAusbilder(authentication)")
+    public ResponseEntity<java.util.List<UserResponse>> listAdmins(Authentication authentication) {
+        java.util.List<User> admins = userService.listAdmins();
+        java.util.List<UserResponse> resp = new java.util.ArrayList<>();
+        for (User u : admins) {
+            resp.add(new UserResponse(u.getId(), u.getUsername(), u.getName(), u.getEmail(), u.getProfileImageUrl()));
+        }
+        return ResponseEntity.ok(resp);
+    }
+
     @Operation(summary = "Profilbild hochladen", description = "Lädt ein Profilbild für den aktuell angemeldeten User hoch")
     @PutMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponse> uploadProfileImage(
@@ -118,9 +130,10 @@ public class UserController {
     @Operation(summary = "Admin-Rolle zuweisen", description = "Weist einem anderen Benutzer die ROLE_ADMIN zu. Nur für bestehende Admins oder Ausbilder.")
     @PutMapping("/{username}/grant-admin")
     @PreAuthorize("hasRole('ADMIN') or @nachweisSecurityService.isAusbilder(authentication)")
-    public ResponseEntity<String> grantAdmin(@PathVariable("username") String username) {
+    public ResponseEntity<String> grantAdmin(@PathVariable("username") String username, Authentication authentication) {
         try {
-            userService.grantAdminRoleToUser(username);
+            String caller = (authentication != null) ? authentication.getName() : "system";
+            userService.grantAdminRoleToUser(username, caller);
             return ResponseEntity.ok("ROLE_ADMIN erfolgreich zugewiesen an " + username);
         } catch (IllegalArgumentException e) {
             log.warn("Grant admin fehlgeschlagen: {}", e.getMessage());
@@ -156,7 +169,8 @@ public class UserController {
                 // nor ausbilder.
             }
 
-            userService.revokeAdminRoleFromUser(username);
+            String caller = (authentication != null) ? authentication.getName() : "system";
+            userService.revokeAdminRoleFromUser(username, caller);
             return ResponseEntity.ok("ROLE_ADMIN erfolgreich entzogen von " + username);
         } catch (IllegalArgumentException e) {
             log.warn("Revoke admin fehlgeschlagen: {}", e.getMessage());

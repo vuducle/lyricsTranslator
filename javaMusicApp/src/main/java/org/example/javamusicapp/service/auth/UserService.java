@@ -2,6 +2,7 @@ package org.example.javamusicapp.service.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.javamusicapp.model.User;
+import org.example.javamusicapp.service.audit.RoleAuditService;
 import org.example.javamusicapp.repository.UserRepository;
 import org.example.javamusicapp.repository.RoleRepository;
 import org.example.javamusicapp.model.Role;
@@ -39,6 +40,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final RoleAuditService roleAuditService;
     private static final String UPLOAD_DIR = "uploads/profile-images/";
     @Value("${image.max-width:1024}")
     private int maxWidth;
@@ -49,10 +51,12 @@ public class UserService implements UserDetailsService {
     @Value("${image.quality:0.75}")
     private float imageQuality;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository,
+            RoleAuditService roleAuditService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
+        this.roleAuditService = roleAuditService;
         // Erstelle das Upload-Verzeichnis, falls es nicht existiert
         try {
             Files.createDirectories(Paths.get(UPLOAD_DIR));
@@ -62,6 +66,10 @@ public class UserService implements UserDetailsService {
     }
 
     public void grantAdminRoleToUser(String targetUsername) {
+        grantAdminRoleToUser(targetUsername, "system");
+    }
+
+    public void grantAdminRoleToUser(String targetUsername, String performedBy) {
         User target = userRepository.findByUsername(targetUsername)
                 .orElseThrow(() -> new IllegalArgumentException("Zielbenutzer nicht gefunden: " + targetUsername));
 
@@ -79,9 +87,18 @@ public class UserService implements UserDetailsService {
         target.getRoles().add(adminRole);
         userRepository.save(target);
         log.info("ROLE_ADMIN zugewiesen an User: {}", targetUsername);
+        try {
+            roleAuditService.record("GRANT", targetUsername, performedBy, "Assigned ROLE_ADMIN");
+        } catch (Exception e) {
+            log.warn("Audit-Eintrag konnte nicht geschrieben werden: {}", e.getMessage());
+        }
     }
 
     public void revokeAdminRoleFromUser(String targetUsername) {
+        revokeAdminRoleFromUser(targetUsername, "system");
+    }
+
+    public void revokeAdminRoleFromUser(String targetUsername, String performedBy) {
         User target = userRepository.findByUsername(targetUsername)
                 .orElseThrow(() -> new IllegalArgumentException("Zielbenutzer nicht gefunden: " + targetUsername));
 
@@ -104,7 +121,16 @@ public class UserService implements UserDetailsService {
         if (removed) {
             userRepository.save(target);
             log.info("ROLE_ADMIN entfernt von User: {}", targetUsername);
+            try {
+                roleAuditService.record("REVOKE", targetUsername, performedBy, "Removed ROLE_ADMIN");
+            } catch (Exception e) {
+                log.warn("Audit-Eintrag konnte nicht geschrieben werden: {}", e.getMessage());
+            }
         }
+    }
+
+    public java.util.List<User> listAdmins() {
+        return userRepository.findAllByRoles_Name(ERole.ROLE_ADMIN);
     }
 
     public boolean isAdmin(String username) {

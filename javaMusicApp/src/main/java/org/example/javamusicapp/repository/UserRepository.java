@@ -21,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     // Count users that have a role with the given enum name
     long countByRoles_Name(ERole roleName);
 
+    java.util.List<User> findAllByRoles_Name(ERole roleName);
+
 }
