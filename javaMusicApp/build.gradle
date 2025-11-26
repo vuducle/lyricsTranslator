@@ -22,6 +22,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -42,6 +43,11 @@ dependencies {
     implementation 'org.apache.pdfbox:pdfbox:2.0.29'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'jakarta.mail:jakarta.mail-api:2.1.2'
+    // ImageIO WebP support (TwelveMonkeys)
+    implementation 'com.twelvemonkeys.imageio:imageio-webp:3.9.4'
+    // Note: using TwelveMonkeys WebP provider (com.twelvemonkeys.imageio:imageio-webp)
+    // Add alternative JAI-ImageIO core from JitPack to increase chance of WebP writer availability
+    implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'

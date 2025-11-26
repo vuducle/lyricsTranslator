@@ -59,6 +59,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 
   - Feld: `file` (image/\*)
   - Beim Hochladen wird das alte Bild aus dem Storage gelöscht und die URL aktualisiert
+  - Vor dem Speichern wird das Bild auf maximal `1024x1024` skaliert (proportional) und als **WebP** (fallback JPEG) mit ~75% Qualität gespeichert
 
 - DELETE `/api/user/profile-image`
 

@@ -69,6 +69,8 @@ Body: "Altes Passwort ist nicht korrekt"
 - Nur Bilddateien erlaubt (Content-Type muss `image/*` sein)
 - Datei darf nicht leer sein
 - Das alte Profilbild wird automatisch aus dem Storage gelöscht
+- Vor dem Speichern wird das Bild als JPEG mit ~75% Qualität komprimiert (Datei wird ggf. konvertiert)
+- Vor dem Speichern wird das Bild auf maximal `1024x1024` skaliert (proportional) und als **WebP** (fallback JPEG) mit ~75% Qualität gespeichert
 
 ---
 
