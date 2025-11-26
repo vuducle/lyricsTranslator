@@ -119,8 +119,8 @@ public class NachweisController {
     @ApiResponse(responseCode = "403", description = "Verboten - Sie sind nicht berechtigt, diesen Nachweis zu löschen.")
     @ApiResponse(responseCode = "404", description = "Nachweis nicht gefunden.")
     @PreAuthorize("hasRole('ADMIN') or @nachweisSecurityService.isOwner(authentication, #id)")
-    public ResponseEntity<Void> deleteNachweis(@PathVariable UUID id) {
-        nachweisService.loescheNachweis(id);
+    public ResponseEntity<Void> deleteNachweis(@PathVariable UUID id, @AuthenticationPrincipal UserDetails userDetails) {
+        nachweisService.loescheNachweis(id, userDetails.getUsername());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -184,12 +184,12 @@ public class NachweisController {
     @ApiResponse(responseCode = "404", description = "Nachweis nicht gefunden.")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Nachweis> updateNachweisStatus(@PathVariable UUID id,
-            @Valid @RequestBody NachweisStatusUpdateRequest request) {
+            @Valid @RequestBody NachweisStatusUpdateRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         if (!id.equals(request.getNachweisId())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         Nachweis updatedNachweis = nachweisService.updateNachweisStatus(request.getNachweisId(), request.getStatus(),
-                request.getComment());
+                request.getComment(), userDetails.getUsername());
         return ResponseEntity.ok(updatedNachweis);
     }
 

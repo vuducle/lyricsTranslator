@@ -37,6 +37,7 @@ public class NachweisService {
     private final UserRepository userRepository;
     private final EmailService emailService; // Inject EmailService
     private final PdfExportService pdfExportService; // Inject PdfExportService
+    private final NachweisAuditService nachweisAuditService; // Inject NachweisAuditService
 
     private final Path rootLocation = Paths.get("generated_pdfs");
 
@@ -86,6 +87,7 @@ public class NachweisService {
         }
 
         Nachweis savedNachweis = nachweisRepository.save(nachweis); // Save first to get ID
+        nachweisAuditService.loggeNachweisAktion(savedNachweis.getId(), "ERSTELLT", username, null, savedNachweis);
 
         try {
             byte[] pdfBytes = pdfExportService.generateAusbildungsnachweisPdf(savedNachweis);
@@ -236,9 +238,11 @@ public class NachweisService {
     }
 
     @Transactional
-    public void loescheNachweis(UUID id) {
+    public void loescheNachweis(UUID id, String username) {
         Nachweis nachweis = nachweisRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nachweis mit der ID nicht gefunden: " + id));
+
+        nachweisAuditService.loggeNachweisAktion(nachweis.getId(), "GELOESCHT", username, nachweis, null);
 
         String userVollerName = nachweis.getAzubi().getName().toLowerCase().replaceAll(" ", "_");
         Path userDirectory = rootLocation.resolve(userVollerName + "_" + nachweis.getAzubi().getId().toString());
@@ -325,13 +329,18 @@ public class NachweisService {
     }
 
     @Transactional
-    public Nachweis updateNachweisStatus(UUID nachweisId, EStatus neuerStatus, String comment) {
-        Nachweis nachweis = nachweisRepository.findById(nachweisId)
+    public Nachweis updateNachweisStatus(UUID nachweisId, EStatus neuerStatus, String comment, String username) {
+        Nachweis alterNachweis = nachweisRepository.findById(nachweisId)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Nachweis mit der ID " + nachweisId + " nicht gefunden."));
-        nachweis.setStatus(neuerStatus);
-        nachweis.setComment(comment);
-        Nachweis updatedNachweis = nachweisRepository.save(nachweis);
+        // Eine Kopie des alten Nachweises erstellen, um den Zustand vor der Änderung zu speichern
+        Nachweis alterNachweisKopie = new Nachweis(alterNachweis); // Annahme: Es gibt einen Kopierkonstruktor
+
+        alterNachweis.setStatus(neuerStatus);
+        alterNachweis.setComment(comment);
+        Nachweis updatedNachweis = nachweisRepository.save(alterNachweis);
+
+        nachweisAuditService.loggeNachweisAktion(updatedNachweis.getId(), "STATUS_AKTUALISIERT", username, alterNachweisKopie, updatedNachweis);
 
         // Send email to Azubi about status update
         User azubi = updatedNachweis.getAzubi();
@@ -446,27 +455,28 @@ public class NachweisService {
 
     @Transactional
     public Nachweis aktualisiereNachweisDurchAzubi(UUID nachweisId, CreateNachweisRequest request, String username) {
-        Nachweis nachweis = nachweisRepository.findById(nachweisId)
+        Nachweis alterNachweis = nachweisRepository.findById(nachweisId)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Nachweis mit der ID " + nachweisId + " nicht gefunden."));
+        Nachweis alterNachweisKopie = new Nachweis(alterNachweis); // Kopie für Audit-Log
 
         User azubi = userService.findByUsername(username);
-        if (!nachweis.getAzubi().getId().equals(azubi.getId())) {
+        if (!alterNachweis.getAzubi().getId().equals(azubi.getId())) {
             throw new UnauthorizedActionException("Sie sind nicht berechtigt, diesen Nachweis zu aktualisieren.");
         }
 
         User ausbilder = userRepository.findById(request.getAusbilderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Ausbilder nicht gefunden."));
 
-        nachweis.setDatumStart(request.getDatumStart());
-        nachweis.setDatumEnde(request.getDatumEnde());
-        nachweis.setNummer(request.getNummer());
-        nachweis.setAusbildungsjahr(request.getAusbildungsjahr());
-        nachweis.setAusbilder(ausbilder);
-        nachweis.setStatus(EStatus.IN_BEARBEITUNG); // Reset status to IN_BEARBEITUNG
+        alterNachweis.setDatumStart(request.getDatumStart());
+        alterNachweis.setDatumEnde(request.getDatumEnde());
+        alterNachweis.setNummer(request.getNummer());
+        alterNachweis.setAusbildungsjahr(request.getAusbildungsjahr());
+        alterNachweis.setAusbilder(ausbilder);
+        alterNachweis.setStatus(EStatus.IN_BEARBEITUNG); // Reset status to IN_BEARBEITUNG
 
         // Clear existing activities and add new ones
-        nachweis.getActivities().clear();
+        alterNachweis.getActivities().clear();
         if (request.getActivities() != null && !request.getActivities().isEmpty()) {
             request.getActivities().forEach(activityDTO -> {
                 Activity activity = new Activity();
@@ -475,27 +485,28 @@ public class NachweisService {
                 activity.setDescription(activityDTO.getDescription());
                 activity.setHours(activityDTO.getHours());
                 activity.setSection(activityDTO.getSection());
-                nachweis.addActivity(activity);
+                alterNachweis.addActivity(activity);
             });
         } else {
             // Re-add default activities if none provided
-            nachweis.addActivity(createActivity(Weekday.MONDAY, 1, "Schule", new BigDecimal("8.0"), "Theorie"));
-            nachweis.addActivity(createActivity(Weekday.TUESDAY, 1, "Teambesprechung mit Triesnha Ameilya",
+            alterNachweis.addActivity(createActivity(Weekday.MONDAY, 1, "Schule", new BigDecimal("8.0"), "Theorie"));
+            alterNachweis.addActivity(createActivity(Weekday.TUESDAY, 1, "Teambesprechung mit Triesnha Ameilya",
                     new BigDecimal("1.0"), "Meeting"));
-            nachweis.addActivity(
+            alterNachweis.addActivity(
                     createActivity(Weekday.TUESDAY, 2, "Coding mit Vergil", new BigDecimal("7.0"), "Entwicklung"));
-            nachweis.addActivity(createActivity(Weekday.WEDNESDAY, 1, "Layoutdesign mit Armin Wache",
+            alterNachweis.addActivity(createActivity(Weekday.WEDNESDAY, 1, "Layoutdesign mit Armin Wache",
                     new BigDecimal("4.0"), "Design"));
-            nachweis.addActivity(createActivity(Weekday.WEDNESDAY, 2, "Vibe coding mit Vu Quy Le",
+            alterNachweis.addActivity(createActivity(Weekday.WEDNESDAY, 2, "Vibe coding mit Vu Quy Le",
                     new BigDecimal("4.0"), "Entwicklung"));
-            nachweis.addActivity(
+            alterNachweis.addActivity(
                     createActivity(Weekday.THURSDAY, 1, "Coding mit Vergil", new BigDecimal("8.0"), "Entwicklung"));
-            nachweis.addActivity(
+            alterNachweis.addActivity(
                     createActivity(Weekday.FRIDAY, 1, "Coding mit Vergil", new BigDecimal("7.0"), "Entwicklung"));
-            nachweis.addActivity(createActivity(Weekday.FRIDAY, 2, "Code Review", new BigDecimal("1.0"), "QA"));
+            alterNachweis.addActivity(createActivity(Weekday.FRIDAY, 2, "Code Review", new BigDecimal("1.0"), "QA"));
         }
 
-        Nachweis updatedNachweis = nachweisRepository.save(nachweis);
+        Nachweis updatedNachweis = nachweisRepository.save(alterNachweis);
+        nachweisAuditService.loggeNachweisAktion(updatedNachweis.getId(), "AKTUALISIERT_AZUBI", username, alterNachweisKopie, updatedNachweis);
 
         try {
             byte[] pdfBytes = pdfExportService.generateAusbildungsnachweisPdf(updatedNachweis);

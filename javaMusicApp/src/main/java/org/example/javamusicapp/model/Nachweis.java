@@ -55,6 +55,29 @@ public class Nachweis {
         @OneToMany(mappedBy = "nachweis", cascade = CascadeType.ALL, orphanRemoval = true)
         private List<Activity> activities = new ArrayList<>();
 
+        // Kopierkonstruktor für Audit-Zwecke
+        public Nachweis(Nachweis other) {
+                this.id = other.id;
+                this.name = other.name;
+                this.datumStart = other.datumStart;
+                this.datumEnde = other.datumEnde;
+                this.nummer = other.nummer;
+                this.Ausbildungsjahr = other.Ausbildungsjahr;
+                this.status = other.status;
+                this.comment = other.comment;
+                this.ausbilder = other.ausbilder; // Shallow copy, assuming User is managed
+                this.azubi = other.azubi; // Shallow copy, assuming User is managed
+                this.datumAzubi = other.datumAzubi;
+                this.signaturAzubi = other.signaturAzubi;
+                this.signaturAusbilder = other.signaturAusbilder;
+                this.activities = new ArrayList<>(); // Neue Liste für Aktivitäten
+                for (Activity activity : other.activities) {
+                        Activity newActivity = new Activity(activity); // Annahme: Activity hat auch einen Kopierkonstruktor
+                        newActivity.setNachweis(this);
+                        this.activities.add(newActivity);
+                }
+        }
+
         public void addActivity(Activity activity) {
                 if (activity == null)
                         return;
@@ -62,12 +85,6 @@ public class Nachweis {
                 this.activities.add(activity);
         }
 
-        public void removeActivity(Activity activity) {
-                if (activity == null)
-                        return;
-                this.activities.remove(activity);
-                activity.setNachweis(null);
-        }
 
         public BigDecimal totalForDay(Weekday day) {
                 return activities.stream()

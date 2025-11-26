@@ -34,4 +34,16 @@ public class Activity {
     private BigDecimal hours;
 
     private String section;
+
+    // Kopierkonstruktor für Audit-Zwecke
+    public Activity(Activity other) {
+        this.id = other.id; // ID kopieren, falls benötigt, aber normalerweise bei neuen Objekten null
+        this.day = other.day;
+        this.slot = other.slot;
+        this.description = other.description;
+        this.hours = other.hours;
+        this.section = other.section;
+        // Der Nachweis wird hier NICHT kopiert, da er in der Nachweis-Klasse gesetzt wird,
+        // um eine zirkuläre Abhängigkeit zu vermeiden und die korrekte Beziehung sicherzustellen.
+    }
 }
