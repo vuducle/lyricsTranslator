@@ -27,13 +27,17 @@ public class NachweisAuditService {
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         objectMapper.disable(SerializationFeature.FAIL_ON_SELF_REFERENCES);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        // Make stored JSON human-readable
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
-    public void loggeNachweisAktion(UUID nachweisId, String aktion, String benutzerName, Nachweis alterNachweis, Nachweis neuerNachweis) {
+    public void loggeNachweisAktion(UUID nachweisId, String aktion, String benutzerName, Nachweis alterNachweis,
+            Nachweis neuerNachweis) {
         String alteDatenJson = null;
         String neueDatenJson = null;
 
-        log.debug("Versuche Nachweis Audit-Log für Nachweis-ID: {}, Aktion: {}, Benutzer: {}", nachweisId, aktion, benutzerName);
+        log.debug("Versuche Nachweis Audit-Log für Nachweis-ID: {}, Aktion: {}, Benutzer: {}", nachweisId, aktion,
+                benutzerName);
 
         try {
             if (alterNachweis != null) {
@@ -47,7 +51,8 @@ public class NachweisAuditService {
                 log.debug("Neuer Nachweis JSON-Länge: {}", neueDatenJson.length());
             }
         } catch (JsonProcessingException e) {
-            log.error("Fehler bei der JSON-Serialisierung des Nachweises für Audit-Log (Nachweis-ID: {}): {}", nachweisId, e.getMessage());
+            log.error("Fehler bei der JSON-Serialisierung des Nachweises für Audit-Log (Nachweis-ID: {}): {}",
+                    nachweisId, e.getMessage());
             // Transaktion wird hier wahrscheinlich schon als rollback-only markiert
             throw new RuntimeException("Fehler bei der JSON-Serialisierung für Audit-Log", e); // Exzeption weiterwerfen
         }
@@ -59,15 +64,15 @@ public class NachweisAuditService {
                 LocalDateTime.now(),
                 benutzerName,
                 alteDatenJson,
-                neueDatenJson
-        );
+                neueDatenJson);
 
         try {
             log.debug("Versuche Nachweis Audit-Log zu speichern (Nachweis-ID: {}, Aktion: {})", nachweisId, aktion);
             nachweisAuditLogRepository.save(auditLog);
             log.debug("Nachweis Audit-Log erfolgreich gespeichert für Nachweis-ID: {}", nachweisId);
         } catch (Exception e) {
-            log.error("Fehler beim Speichern des Nachweis Audit-Logs (Nachweis-ID: {}): {}", nachweisId, e.getMessage());
+            log.error("Fehler beim Speichern des Nachweis Audit-Logs (Nachweis-ID: {}): {}", nachweisId,
+                    e.getMessage());
             // Transaktion wird hier wahrscheinlich schon als rollback-only markiert
             throw new RuntimeException("Fehler beim Speichern des Nachweis Audit-Logs", e); // Exzeption weiterwerfen
         }

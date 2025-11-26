@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NachweisAuditLogRepository extends JpaRepository<NachweisAuditLog, Long> {
+    org.springframework.data.domain.Page<NachweisAuditLog> findAllByNachweisId(java.util.UUID nachweisId,
+            org.springframework.data.domain.Pageable pageable);
 }
