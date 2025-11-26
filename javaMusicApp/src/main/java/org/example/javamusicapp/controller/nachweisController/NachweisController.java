@@ -7,9 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.javamusicapp.controller.nachweisController.dto.CreateNachweisRequest;
 import org.example.javamusicapp.controller.nachweisController.dto.NachweisStatusUpdateRequest;
+import org.example.javamusicapp.exception.ResourceNotFoundException;
 import org.example.javamusicapp.model.enums.EStatus;
 import org.springframework.data.domain.Page;
 import org.example.javamusicapp.model.Nachweis;
@@ -75,7 +77,7 @@ public class NachweisController {
     )
     @ApiResponse(responseCode = "201", description = "Nachweis erfolgreich erstellt.")
     @ApiResponse(responseCode = "500", description = "Interner Serverfehler bei der PDF-Generierung oder Speicherung.")
-    public ResponseEntity<Nachweis> createNachweis(@RequestBody CreateNachweisRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Nachweis> createNachweis(@Valid @RequestBody CreateNachweisRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         Nachweis nachweis = nachweisService.erstelleNachweis(request, userDetails.getUsername());
 
         try {
@@ -118,7 +120,7 @@ public class NachweisController {
     @PreAuthorize("hasRole('ADMIN') or @nachweisSecurityService.isOwner(authentication, #id)")
     public ResponseEntity<Resource> getNachweisPdf(@PathVariable UUID id) {
         Nachweis nachweis = nachweisRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nachweis not found")); // Should be a proper exception
+                .orElseThrow(() -> new ResourceNotFoundException("Nachweis not found")); // Should be a proper exception
 
         try {
             Path userDirectory = rootLocation.resolve(nachweis.getAzubi().getId().toString());
@@ -213,7 +215,7 @@ public class NachweisController {
     @ApiResponse(responseCode = "403", description = "Verboten - Nur Administratoren können den Nachweisstatus aktualisieren.")
     @ApiResponse(responseCode = "404", description = "Nachweis nicht gefunden.")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Nachweis> updateNachweisStatus(@PathVariable UUID id, @RequestBody NachweisStatusUpdateRequest request) {
+    public ResponseEntity<Nachweis> updateNachweisStatus(@PathVariable UUID id, @Valid @RequestBody NachweisStatusUpdateRequest request) {
         if (!id.equals(request.getNachweisId())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -229,7 +231,7 @@ public class NachweisController {
     @ApiResponse(responseCode = "403", description = "Verboten - Sie sind nicht der Besitzer dieses Nachweises.")
     @ApiResponse(responseCode = "404", description = "Nachweis nicht gefunden.")
     @PreAuthorize("@nachweisSecurityService.isOwner(authentication, #id)")
-    public ResponseEntity<Nachweis> updateNachweisByAzubi(@PathVariable UUID id, @RequestBody CreateNachweisRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Nachweis> updateNachweisByAzubi(@PathVariable UUID id, @Valid @RequestBody CreateNachweisRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         Nachweis updatedNachweis = nachweisService.aktualisiereNachweisDurchAzubi(id, request, userDetails.getUsername());
         return ResponseEntity.ok(updatedNachweis);
     }

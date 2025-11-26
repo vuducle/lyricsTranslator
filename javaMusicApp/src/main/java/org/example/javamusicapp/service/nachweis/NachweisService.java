@@ -3,6 +3,8 @@ package org.example.javamusicapp.service.nachweis;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.javamusicapp.controller.nachweisController.dto.CreateNachweisRequest;
+import org.example.javamusicapp.exception.ResourceNotFoundException;
+import org.example.javamusicapp.exception.UnauthorizedActionException;
 import org.example.javamusicapp.model.Activity;
 import org.example.javamusicapp.model.Nachweis;
 import org.example.javamusicapp.model.User;
@@ -43,7 +45,7 @@ public class NachweisService {
         User user = userService.findByUsername(username);
         
         User ausbilder = userRepository.findById(request.getAusbilderId())
-                .orElseThrow(() -> new RuntimeException("Ausbilder nicht gefunden."));
+                .orElseThrow(() -> new ResourceNotFoundException("Ausbilder nicht gefunden."));
 
         Nachweis nachweis = new Nachweis();
         nachweis.setName(user.getName());
@@ -216,7 +218,7 @@ public class NachweisService {
     @Transactional
     public void loescheNachweis(UUID id) {
         Nachweis nachweis = nachweisRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nachweis mit der ID nicht gefunden: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Nachweis mit der ID nicht gefunden: " + id));
 
         try {
             Path userDirectory = rootLocation.resolve(nachweis.getAzubi().getId().toString());
@@ -283,7 +285,7 @@ public class NachweisService {
     @Transactional
     public Nachweis updateNachweisStatus(UUID nachweisId, EStatus neuerStatus, String comment) {
         Nachweis nachweis = nachweisRepository.findById(nachweisId)
-                .orElseThrow(() -> new RuntimeException("Nachweis mit der ID " + nachweisId + " nicht gefunden."));
+                .orElseThrow(() -> new ResourceNotFoundException("Nachweis mit der ID " + nachweisId + " nicht gefunden."));
         nachweis.setStatus(neuerStatus);
         nachweis.setComment(comment);
         Nachweis updatedNachweis = nachweisRepository.save(nachweis);
@@ -331,15 +333,15 @@ public class NachweisService {
     @Transactional
     public Nachweis aktualisiereNachweisDurchAzubi(UUID nachweisId, CreateNachweisRequest request, String username) {
         Nachweis nachweis = nachweisRepository.findById(nachweisId)
-                .orElseThrow(() -> new RuntimeException("Nachweis mit der ID " + nachweisId + " nicht gefunden."));
+                .orElseThrow(() -> new ResourceNotFoundException("Nachweis mit der ID " + nachweisId + " nicht gefunden."));
 
         User azubi = userService.findByUsername(username);
         if (!nachweis.getAzubi().getId().equals(azubi.getId())) {
-            throw new RuntimeException("Sie sind nicht berechtigt, diesen Nachweis zu aktualisieren.");
+            throw new UnauthorizedActionException("Sie sind nicht berechtigt, diesen Nachweis zu aktualisieren.");
         }
 
         User ausbilder = userRepository.findById(request.getAusbilderId())
-                .orElseThrow(() -> new RuntimeException("Ausbilder nicht gefunden."));
+                .orElseThrow(() -> new ResourceNotFoundException("Ausbilder nicht gefunden."));
 
         nachweis.setDatumStart(request.getDatumStart());
         nachweis.setDatumEnde(request.getDatumEnde());
