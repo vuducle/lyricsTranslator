@@ -3,3 +3,6 @@ javaMusicApp/src/main/resources/application.properties
 # Ignore uploaded files and local storage
 uploads/
 javaMusicApp/uploads/
+# Backend env and secrets
+javaMusicApp/.env
+secrets/
