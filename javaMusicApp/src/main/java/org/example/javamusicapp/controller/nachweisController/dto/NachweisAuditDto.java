@@ -1,4 +1,4 @@
-package org.example.javamusicapp.dto.nachweis;
+package org.example.javamusicapp.controller.nachweisController.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;

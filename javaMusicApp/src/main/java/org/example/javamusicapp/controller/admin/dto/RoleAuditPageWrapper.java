@@ -1,10 +1,9 @@
-package org.example.javamusicapp.dto.audit;
+package org.example.javamusicapp.controller.admin.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.javamusicapp.dto.nachweis.AuditPageResponse;
-import org.example.javamusicapp.dto.audit.RoleAuditDto;
+import org.example.javamusicapp.controller.nachweisController.dto.AuditPageResponse;
 
 import java.util.List;
 

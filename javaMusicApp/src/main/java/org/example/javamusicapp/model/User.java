@@ -42,6 +42,12 @@ public class User implements UserDetails {
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
+    @Column(name = "fehlgeschlagene_anmeldeversuche", columnDefinition = "integer default 0")
+    private int fehlgeschlageneAnmeldeversuche = 0;
+
+    @Column(name = "account_gesperrt_bis")
+    private java.time.LocalDateTime accountGesperrtBis;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();

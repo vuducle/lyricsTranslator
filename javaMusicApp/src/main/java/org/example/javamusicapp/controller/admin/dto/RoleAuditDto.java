@@ -1,4 +1,4 @@
-package org.example.javamusicapp.dto.audit;
+package org.example.javamusicapp.controller.admin.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -15,6 +15,7 @@ import org.example.javamusicapp.model.User;
 import org.example.javamusicapp.model.enums.ERole;
 import org.example.javamusicapp.repository.RoleRepository;
 import org.example.javamusicapp.repository.UserRepository;
+import org.example.javamusicapp.service.auth.AnmeldeversuchService;
 import org.example.javamusicapp.service.auth.PasswordResetTokenService;
 import org.example.javamusicapp.service.auth.RefreshTokenService;
 import org.example.javamusicapp.service.auth.UserService;
@@ -26,7 +27,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,11 +44,12 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final UserService userService;
     private final RefreshTokenService refreshTokenService;
     private final RoleRepository roleRepository;
     private final PasswordResetTokenService passwordResetTokenService;
     private final EmailService emailService;
+    private final AnmeldeversuchService anmeldeversuchService;
+    private final UserService userService;
     private final String frontendUrl;
 
     public AuthController(
@@ -56,21 +57,23 @@ public class AuthController {
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtUtil jwtUtil,
-            UserService userService,
             RefreshTokenService refreshTokenService,
             RoleRepository roleRepository,
             PasswordResetTokenService passwordResetTokenService,
             EmailService emailService,
+            AnmeldeversuchService anmeldeversuchService,
+            UserService userService,
             @Value("${app.frontend.url}") String frontendUrl) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
-        this.userService = userService;
         this.refreshTokenService = refreshTokenService;
         this.roleRepository = roleRepository;
         this.passwordResetTokenService = passwordResetTokenService;
         this.emailService = emailService;
+        this.anmeldeversuchService = anmeldeversuchService;
+        this.userService = userService;
         this.frontendUrl = frontendUrl;
     }
 
@@ -100,25 +103,32 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Meldet Benutzer an", description = "Prüft Credentials, gibt bei Erfolg ein JWT-Token zurück, das für geschützte Endpunkte benötigt wird.")
-    public ResponseEntity<AuthResponse> authenticateUser(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest request) {
+        if (anmeldeversuchService.istGesperrt(request.getEmail())) {
+            return new ResponseEntity<>("Ihr Account ist aufgrund zu vieler Fehlversuche temporär gesperrt für 15 Minuten.", HttpStatus.LOCKED);
+        }
+
         try {
-            User user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new AuthenticationException("Benutzer mit E-Mail nicht gefunden: " + request.getEmail()) {});
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), request.getPassword()));
-            UserDetails userDetails = userService.loadUserByUsername(user.getUsername());
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+
+            User userDetails = (User) authentication.getPrincipal();
+
             String token = jwtUtil.generateToken(userDetails);
-            RefreshToken refreshToken = refreshTokenService.createRefreshToken((User) userDetails);
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails);
+
             AuthResponse response = new AuthResponse();
             response.setAccessToken(token);
             response.setRefreshToken(refreshToken.getToken());
             response.setUsername(userDetails.getUsername());
-            response.setEmail(request.getEmail());
-            response.setName(((User) userDetails).getName());
+            response.setEmail(userDetails.getEmail());
+            response.setName(userDetails.getName());
+
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
-            log.error("Login Fehler: {}", e.getMessage());
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+            log.error("Login Fehler für E-Mail {}: {}", request.getEmail(), e.getMessage());
+            // Anmeldeversuch-Listener wird den Fehlversuch protokollieren.
+            return new ResponseEntity<>("E-Mail oder Passwort ist ungültig.", HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -149,7 +159,6 @@ public class AuthController {
         Optional<User> userOptional = userRepository.findByEmail(forgotPasswordRequest.getEmail());
 
         if (userOptional.isEmpty()) {
-            // Return a generic message to avoid exposing whether an email is registered
             return ResponseEntity.ok("Wenn ein Konto mit dieser E-Mail-Adresse existiert, wurde ein Link zum Zurücksetzen des Passworts gesendet.");
         }
 
