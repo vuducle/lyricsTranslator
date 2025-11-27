@@ -8,6 +8,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -20,23 +21,29 @@ public class AnmeldeversuchListener {
     @EventListener
     public void onAuthenticationSuccess(AuthenticationSuccessEvent event) {
         Object principal = event.getAuthentication().getPrincipal();
+        String ip = "Unbekannt";
+        if (event.getAuthentication().getDetails() instanceof WebAuthenticationDetails) {
+            ip = ((WebAuthenticationDetails) event.getAuthentication().getDetails()).getRemoteAddress();
+        }
+
         if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
-            // Assuming the UserDetailsService loads user by username, but our app uses email for login.
-            // We need to get the user object to get the email.
-            anmeldeversuchService.getUserByEmail(((User) principal).getEmail()).ifPresent(user -> {
-                log.info("Anmeldung erfolgreich für: {}", user.getEmail());
-                anmeldeversuchService.anmeldungErfolgreich(user.getEmail());
-            });
+            User user = (User) principal;
+            log.info("AUDIT: Erfolgreiche Anmeldung für Benutzer '{}' (E-Mail: {}) von IP-Adresse: {}", user.getUsername(), user.getEmail(), ip);
+            anmeldeversuchService.anmeldungErfolgreich(user.getEmail());
         }
     }
 
     @EventListener
     public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent event) {
         Object principal = event.getAuthentication().getPrincipal();
+        String ip = "Unbekannt";
+        if (event.getAuthentication().getDetails() instanceof WebAuthenticationDetails) {
+            ip = ((WebAuthenticationDetails) event.getAuthentication().getDetails()).getRemoteAddress();
+        }
+
         if (principal instanceof String) {
             String email = (String) principal;
-            log.warn("Fehlgeschlagene Anmeldung für: {}", email);
+            log.warn("AUDIT: Fehlgeschlagene Anmeldung für E-Mail '{}' von IP-Adresse: {}. Grund: {}", email, ip, event.getException().getMessage());
             anmeldeversuchService.anmeldungFehlgeschlagen(email);
         }
     }

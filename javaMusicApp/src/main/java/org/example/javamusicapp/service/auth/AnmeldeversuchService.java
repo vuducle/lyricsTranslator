@@ -1,6 +1,7 @@
 package org.example.javamusicapp.service.auth;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.javamusicapp.model.User;
 import org.example.javamusicapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AnmeldeversuchService {
 
     private static final int MAX_FEHLVERSUCHE = 5;
@@ -31,6 +33,7 @@ public class AnmeldeversuchService {
             user.setFehlgeschlageneAnmeldeversuche(versuche);
             if (versuche >= MAX_FEHLVERSUCHE) {
                 user.setAccountGesperrtBis(LocalDateTime.now().plusMinutes(SPERRDAUER_MINUTEN));
+                log.warn("AUDIT: Account für E-Mail '{}' wurde für {} Minuten gesperrt.", email, SPERRDAUER_MINUTEN);
             }
             userRepository.save(user);
         });

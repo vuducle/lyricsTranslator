@@ -210,13 +210,13 @@ public class UserService implements UserDetailsService {
         // Setze das neue Passwort
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-        log.info("Passwort geändert für User: {}", username);
+        log.info("AUDIT: Passwort wurde vom Benutzer '{}' geändert.", username);
     }
 
     public void resetPassword(User user, String newPassword) {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-        log.info("Passwort zurückgesetzt für User: {}", user.getUsername());
+        log.info("AUDIT: Passwort für Benutzer '{}' wurde über die Passwort-zurücksetzen-Funktion geändert.", user.getUsername());
     }
 
     public User updateUserProfile(String username, org.example.javamusicapp.controller.userController.dto.UserUpdateRequest request) {
