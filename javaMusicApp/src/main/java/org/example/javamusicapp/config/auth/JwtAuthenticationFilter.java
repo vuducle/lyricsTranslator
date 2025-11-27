@@ -54,16 +54,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwt = authorizationHeader.substring(7);
-        username = jwtUtil.extractUsername(jwt);
+        final String email = jwtUtil.extractSubject(jwt);
         // 3. Wichtigste Logik (kommt als Nächstes):
         // TODO: Extrahiere den Username aus dem JWT.
         // TODO: Prüfe, ob der Token gültig ist.
         // TODO: Lade den User aus PostgreSQL via UserDetailsService.
         // TODO: Speichere den User im Spring Security Context.
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Tải UserDetails từ cơ sở dữ liệu PostgreSQL (thông qua UserService)
-            UserDetails userDetails = userService.loadUserByUsername(username);
+            UserDetails userDetails = userService.loadUserByUsername(email);
             if (jwtUtil.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails,

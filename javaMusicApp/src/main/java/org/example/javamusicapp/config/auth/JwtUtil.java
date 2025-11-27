@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.example.javamusicapp.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -22,10 +23,15 @@ public class JwtUtil {
     private long jwtExpirationInMs;
 
     public String generateToken(UserDetails userDetails) {
+        if (!(userDetails instanceof User)) {
+            throw new IllegalArgumentException("UserDetails must be an instance of User");
+        }
+        User user = (User) userDetails;
+
         Map<String, Object> map = new HashMap<>();
-        map.put("userName", userDetails.getUsername());
-        map.put("authorities", userDetails.getAuthorities());
-        map.put("roles", userDetails.getAuthorities());
+        map.put("userName", user.getUsername()); // Keep username in claims for other purposes
+        map.put("authorities", user.getAuthorities());
+        map.put("roles", user.getAuthorities());
         map.put("isAccountNonExpired", true);
         map.put("isAccountNonLocked", true);
         map.put("isCredentialsNonExpired", true);
@@ -33,21 +39,25 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .setClaims(map)
-                .setSubject(userDetails.getUsername())
+                .setSubject(user.getEmail()) // Use email as the subject
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public String extractUsername(String token) {
+    public String extractSubject(String token) {
         return extractClaims(token, Claims::getSubject);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
+        if (!(userDetails instanceof User)) {
+            return false;
+        }
         try {
-            final String benutzerName = extractUsername(token);
-            return (benutzerName.equals(userDetails.getUsername()) && !isTokenExpired(token));
+            final String subject = extractSubject(token);
+            // Subject is now email
+            return (subject.equals(((User) userDetails).getEmail()) && !isTokenExpired(token));
         }
         catch (Exception e) {
             return false;
