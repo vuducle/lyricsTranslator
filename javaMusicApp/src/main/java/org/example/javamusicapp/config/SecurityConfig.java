@@ -23,10 +23,23 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/*
-* Sicherheitskonfiguration für die JavaMusicApp.
-* Definiert die Sicherheitsfilterkette, Authentifizierungsprovider und CORS-Regeln
-* Autor: Julia Nguyen
+/**
+ * 🏰 **Was geht hier ab?**
+ * Das ist die Festungsmauer unserer App. Hier wird die komplette Security geregelt. Die Klasse ist quasi
+ * die Security-Zentrale und eine der wichtigsten Klassen im ganzen Projekt. No cap.
+ *
+ * Was sie genau macht:
+ * 1.  **Routen schützen:** Legt fest, welche API-Routen public sind (z.B. `/api/auth/**` für Login/Register)
+ *     und welche einen gültigen JWT-Token brauchen (basically alle anderen).
+ * 2.  **Stateless-Modus:** Stellt die Sessions auf `STATELESS`. Heißt, der Server speichert keine Login-Infos.
+ *     Jeder Request muss den JWT mitschicken, um sich auszuweisen. Das ist modern und skaliert besser.
+ * 3.  **Filter einbauen:** Hängt unsere custom Filter in die Security-Kette rein.
+ *     - `RateLimitFilter`: Kommt fast zuerst, um Spammer früh zu blocken.
+ *     - `JwtAuthenticationFilter`: Kommt vor dem Standard-Login-Filter, um die JWTs zu checken.
+ * 4.  **CORS:** Konfiguriert die CORS-Regeln, damit das Frontend mit dem Backend quatschen kann, ohne dass
+ *     der Browser es blockt.
+ * 5.  **Error Handling:** Sagt der App, dass sie den `JwtAuthEntryPoint` nutzen soll, wenn ein Non-Admin-User
+ *     auf 'nen Admin-Endpoint will.
  */
 @Configuration
 @EnableWebSecurity

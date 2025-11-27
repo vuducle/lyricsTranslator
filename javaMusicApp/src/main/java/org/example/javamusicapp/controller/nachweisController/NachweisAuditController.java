@@ -28,6 +28,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+/**
+ * 📜 **Was geht hier ab?**
+ * Dieser Controller ist der "Was ist passiert?"-Detektiv für die Ausbildungsnachweise.
+ * Er liefert die komplette History zu einem Nachweis. Admins, Ausbilder und der Azubi selbst
+ * können hier ganz genau nachschauen, was mit einem Nachweis passiert ist.
+ *
+ * Die Endpunkte zeigen:
+ * - / :** Eine Liste aller Änderungen an allen Nachweisen (nur für Admins/Ausbilder).
+ * - /{nachweisId}**: Die komplette History für EINEN bestimmten Nachweis. Also wer hat ihn
+ *   erstellt, wann wurde er eingereicht, wer hat ihn genehmigt oder abgelehnt und welche
+ *   Daten haben sich dabei geändert (vorher/nachher Vergleich).
+ *
+ * Ultra wichtig für die Nachvollziehbarkeit und wenn's mal Diskussionen gibt.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/admin/nachweis-audit")

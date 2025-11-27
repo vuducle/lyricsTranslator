@@ -27,6 +27,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
+/**
+ * 🕵️ **Was geht hier ab?**
+ * Dieser Controller ist ein reines Admin-Tool. Er stellt Endpunkte bereit, mit denen Admins und Ausbilder
+ * die History von Rollen-Änderungen checken können.
+ *
+ * Man kann also sehen:
+ * - Wer hat wem welche Rolle gegeben oder weggenommen?
+ * - Wann ist das passiert?
+ *
+ * Das ist quasi das Logbuch für alle sicherheitsrelevanten Änderungen an User-Rollen.
+ * Absolut notwendig, um den Überblick zu behalten und zu wissen, "wer was darf".
+ * Der Zugriff ist natürlich auf Admins und Ausbilder beschränkt.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/admin")

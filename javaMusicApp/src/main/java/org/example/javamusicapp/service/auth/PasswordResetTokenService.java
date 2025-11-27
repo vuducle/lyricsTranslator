@@ -12,6 +12,22 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * 🔑 **Was geht hier ab?**
+ * Dieser Service ist der Master of "Passwort vergessen". Er kümmert sich um den ganzen
+ * Lifecycle von Password-Reset-Tokens.
+ *
+ * Das Game ist simpel:
+ * - **createPasswordResetToken()**: Wenn ein User sein Passwort vercheckt hat, wird diese
+ *   Methode gerufen. Sie erstellt einen unique, random Token, der nur für diesen einen
+ *   User gilt und nach einer bestimmten Zeit (z.B. 1 Stunde) abläuft. Alte Tokens für
+ *   den User werden dabei direkt gekillt.
+ * - **verifyExpiration()**: Checkt, ob ein Token noch fresh ist oder schon abgelaufen.
+ *   Abgelaufene Tokens werden direkt aus der DB gelöscht.
+ * - **findByToken() / deleteToken()**: Sucht oder löscht einen Token. Logisch, oder?
+ *
+ * Sorgt dafür, dass der Passwort-Reset-Prozess sicher und smooth abläuft.
+ */
 @Service
 public class PasswordResetTokenService {
 

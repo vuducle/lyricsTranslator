@@ -16,6 +16,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+
+/**
+ * 🤙 **Was geht hier ab?**
+ * Dieser Bre lädt beim Start der App direkt mal ein paar freshe Default-Daten in die Datenbank.
+ * Stellt sicher, dass die App nicht komplett leer ist und man direkt was zum Rumspielen hat.
+ * Hier werden z.B. die Standard-User-Rollen (wie `ROLE_USER`, `ROLE_ADMIN`) und ein paar Test-User erstellt,
+ * damit das Rechtesystem von Anfang an stabil läuft und man die App direkt testen kann. Ohne die Roles wär die App lost.
+ */
 @Component
 public class DataLoader implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(DataLoader.class);

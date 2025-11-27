@@ -16,6 +16,21 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * 🛂 **Was geht hier ab?**
+ * Dieser Filter ist bei jeder API-Anfrage am Start (außer bei den public-Routen wie Login).
+ * Er ist wie der Pass-Kontrolleur am Flughafen für fast jeden Request.
+ *
+ * Seine Mission:
+ * 1.  Er fischt sich den `Authorization`-Header aus der Anfrage.
+ * 2.  Er checkt, ob da ein "Bearer <token>" drinsteht.
+ * 3.  Wenn ja, schnappt er sich den JWT (JSON Web Token) und übergibt ihn an den `JwtUtil`.
+ * 4.  Der `JwtUtil` checkt, ob der Token valid (echt und nicht abgelaufen) ist.
+ * 5.  Wenn alles passt, holt der Filter die User-Infos aus dem Token (z.B. Username/Email) und
+ *     lädt den passenden User aus der Datenbank.
+ * 6.  Am Ende sagt er Spring Security: "Yo, der User ist legit für diesen Request, lass ihn rein."
+ *     Damit ist der User für diese eine Anfrage authentifiziert.
+ */
 @Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {

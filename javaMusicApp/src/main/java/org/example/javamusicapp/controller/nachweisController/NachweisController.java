@@ -37,6 +37,26 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 📝 **Was geht hier ab?**
+ * This is the G.O.A.T. Controller für alles, was mit den Ausbildungsnachweisen zu tun hat.
+ * Hier können Azubis ihre Nachweise erstellen, bearbeiten und einsehen. Ausbilder/Admins
+ * können die Dinger checken, annehmen, ablehnen und alle Nachweise von allen Azubis sehen.
+ *
+ * Die Endpunkte sind lit und regeln basically das ganze Leben eines Nachweises:
+ * - **POST /**: Azubi erstellt einen neuen Nachweis für die Woche. Im Backend wird direkt
+ *   ein PDF generiert und gespeichert.
+ * - **GET /my-nachweise**: Azubi kann alle seine bisherigen Nachweise sehen,
+ *   filtern (z.B. nur die offenen) und seitenweise durchblättern.
+ * - **GET /{id}/pdf**: Holt das generierte PDF für einen Nachweis. Safe, dass nur der
+ *   Besitzer oder ein Admin das kann.
+ * - **PUT /{id}**: Azubi kann einen Nachweis bearbeiten (z.B. nach Feedback vom Ausbilder).
+ * - **PUT /{id}/status**: Admin/Ausbilder gibt dem Nachweis seinen Segen (`ANGENOMMEN`) oder
+ *   lehnt ihn ab (`ABGELEHNT`).
+ * - **DELETE /{id}**: Löscht einen Nachweis.
+ * - **Admin-Endpunkte (/admin/**):** Extra krasse Endpunkte, mit denen Admins/Ausbilder
+ *   alle Nachweise von allen Usern sehen und verwalten können.
+ */
 @RestController
 @RequestMapping("/api/nachweise")
 @RequiredArgsConstructor

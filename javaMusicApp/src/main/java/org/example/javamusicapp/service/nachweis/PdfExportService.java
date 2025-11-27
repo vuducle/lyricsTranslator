@@ -14,6 +14,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 
+/**
+ * 📄 **Was geht hier ab?**
+ * Dieser Service ist unsere persönliche PDF-Druckerei. Er ist ein reiner Spezialist,
+ * der nur eine Mission hat: Ausbildungsnachweise als PDF zu generieren.
+ *
+ * So läuft der Hase:
+ * - **generateAusbildungsnachweisPdf()**: Die Methode kriegt ein fettes `Nachweis`-Objekt
+ *   mit allen Daten (Name, Datum, Aktivitäten etc.).
+ * - Sie schnappt sich dann ein PDF-Template, das unter `resources/static` liegt.
+ *   Dieses Template ist ein ausfüllbares PDF-Formular.
+ * - Mit der Power von der Apache PDFBox-Library füllt der Service die leeren Felder
+ *   im Template mit den Daten aus dem `Nachweis`-Objekt.
+ * - Am Ende spuckt er das fertige, ausgefüllte PDF als `byte[]` (also als Haufen von Nullen
+ *   und Einsen) aus. Dieses Byte-Array kann dann gespeichert oder per Mail verschickt werden.
+ */
 @Service
 public class PdfExportService {
 

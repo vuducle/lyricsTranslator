@@ -35,6 +35,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
+/**
+ * 🔑 **Was geht hier ab?**
+ * Dieser Controller ist die absolute Zentrale für alles, was mit Auth zu tun hat.
+ * Hier passiert die ganze Magie rund um Login, Registrierung und Passwort-Management.
+ * Alle Endpunkte hier sind public, weil man ja noch nicht eingeloggt ist.
+ *
+ * Die wichtigsten VIBES hier sind:
+ * - /register**: Nimmt die Daten für einen neuen User, hasht das Passwort und speichert
+ *   den Dude in der Datenbank. Standard, aber muss sein.
+ * - /login**: Checkt, ob E-Mail und Passwort matchen. Wenn ja, gibt's als Belohnung einen
+ *   Access Token (JWT) und einen Refresh Token. Der Access Token ist dein Ticket für die
+ *   geschützten Bereiche der App.
+ * /refresh**: Wenn dein Access Token abgelaufen ist (die sind kurzlebig), schickst du
+ *   deinen langlebigen Refresh Token hierher und kriegst 'nen brandneuen Access Token zurück.
+ *   So bleibst du eingeloggt, ohne jedes Mal dein Passwort neu einzugeben.
+ *  /forgot-password & /reset-password**: Wenn du dein Passwort vercheckt hast, kannst du
+ *   hier 'nen Link anfordern, um es zurückzusetzen.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")

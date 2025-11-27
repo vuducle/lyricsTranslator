@@ -9,6 +9,21 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+/**
+ * 🚨 **Was geht hier ab?**
+ * Dieser Service ist unser Security Guard gegen Brute-Force-Attacken beim Login.
+ * Er zählt mit, wie oft jemand versucht, sich mit falschen Credentials einzuloggen.
+ *
+ * So funktioniert's:
+ * - **anmeldungFehlgeschlagen()**: Jedes Mal, wenn ein Login failt, zählt der Counter für die
+ *   E-Mail-Adresse hoch. Nach zu vielen Fehlversuchen (z.B. 5) wird der Account für eine
+ *   bestimmte Zeit (z.B. 15 Minuten) gesperrt. Sheesh!
+ * - **anmeldungErfolgreich()**: Wenn der Login erfolgreich war, wird der Counter wieder auf 0
+ *   gesetzt. Alles wieder fresh.
+ * - **istGesperrt()**: Checkt, ob ein Account gerade eine Zwangspause einlegen muss.
+ *
+ * Das macht es für Hacker ultra nervig, einfach Tausende Passwörter durchzuprobieren.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

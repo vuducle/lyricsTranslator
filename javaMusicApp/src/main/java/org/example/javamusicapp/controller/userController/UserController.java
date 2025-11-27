@@ -20,11 +20,22 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpStatus;
 
 /**
- * Controller für User-bezogene Endpunkte in der JavaMusicApp.
- * Bietet Funktionen zum Ändern des Passworts, Hochladen von Profilbildern und
- * Abrufen von User-Profilinformationen.
- * Autor: Vu Minh Le
- * Version: 1.0
+ * 👤 **Was geht hier ab?**
+ * Dieser Controller ist der Place-to-be für alles, was das eigene User-Profil betrifft.
+ * Hier kann man sein Profil pimpen, das Passwort ändern und so weiter.
+ * Außerdem gibt's hier krasse Admin-Actions, um andere User zu verwalten.
+ *
+ * Für normale User:
+ * - /profile**: Holt dein aktuelles User-Profil mit allen Infos.
+ * - /profile (PUT)**: Updated deine Profil-Infos (Name, E-Mail etc.).
+ * - /change-password**: Hier kannst du dein altes Passwort gegen ein neues, freshes tauschen.
+ * - /profile-image**: Lade ein Profilbild hoch oder lösche es. Zeig dich von deiner besten Seite!
+ *
+ * Für Admins/Ausbilder (High-Level-Stuff):
+ * - /admins**: Listet alle User auf, die Admin-Rechte haben.
+ * - /{username}/grant-admin**: Einem User Admin-Rechte geben. With great power comes great responsibility.
+ * - /{username}/revoke-admin**: Einem User die Admin-Rechte wieder wegnehmen.
+ * - /{username} (DELETE)**: Löscht einen kompletten User-Account. Use with caution!
  */
 @Slf4j
 @RestController

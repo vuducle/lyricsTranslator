@@ -27,6 +27,29 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.IOException;
 
+/**
+ * 👑 **Was geht hier ab?**
+ * Das ist der absolute Master-Service für die Ausbildungsnachweise. Hier passiert die
+ * komplette Magie. Dieser Service ist der Dirigent, der die anderen Services
+ * (`PdfExportService`, `EmailService`, `NachweisAuditService`) koordiniert, um den
+ * ganzen Lebenszyklus eines Nachweises zu managen.
+ *
+ * Die Main-Quests dieses Services:
+ * - **erstelleNachweis()**: Nicht nur ein simpler DB-Eintrag. Dieser Flow erstellt den Nachweis,
+ *   ruft den `PdfExportService` auf, um ein PDF zu backen, speichert das PDF ab UND schickt
+ *   dem Ausbilder direkt 'ne Mail mit dem PDF im Anhang. All-in-One-Paket.
+ * - **kriegeNachweise...()**: Holt die Nachweise aus der DB, mit Filter, Paginierung und allem
+ *   Drum und Dran, damit im Frontend alles fresh aussieht.
+ * - **loescheNachweis()**: Killt nicht nur den Eintrag in der Datenbank, sondern sucht auch
+ *   die zugehörige PDF-Datei auf dem Server und löscht sie. No ghosts in the machine.
+ * - **updateNachweisStatus()**: Wenn der Ausbilder einen Nachweis annimmt oder ablehnt,
+ *   updated dieser Service den Status, loggt die Aktion über den `NachweisAuditService`
+ *   und schickt dem Azubi 'ne Benachrichtigungs-Mail.
+ * - **aktualisiereNachweisDurchAzubi()**: Wenn der Azubi was ändert, wird der Status
+ *   zurückgesetzt, das PDF neu generiert und der Ausbilder wieder benachrichtigt.
+ *
+ * Kurz: Der heftigste Service hier, der das Kern-Feature der App rockt.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

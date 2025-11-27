@@ -7,6 +7,23 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+/**
+ * 🛡️ **Was geht hier ab?**
+ * Dieser Service ist unser Custom Security Dude für die `Nachweis`-Controller.
+ * Er stellt spezielle Methoden bereit, die wir direkt in den `@PreAuthorize`-Annotationen
+ * verwenden können, um komplexe Berechtigungen zu checken, die über einfache Rollen
+ * hinausgehen.
+ *
+ * Die Skills:
+ * - **isOwner()**: Checkt, ob der aktuell eingeloggte User auch wirklich der Owner
+ *   (also der Ersteller) von einem bestimmten Nachweis ist. Damit stellen wir sicher,
+ *   dass User A nicht die Nachweise von User B bearbeiten kann.
+ * - **isAusbilder()**: Checkt, ob ein User ein "Ausbilder" ist. Diese Info steht nicht
+ *   direkt in den User-Rollen, sondern wird daraus abgeleitet, ob der User in der
+ *   `Nachweis`-Tabelle als Ausbilder eingetragen ist.
+ *
+ * Macht unsere Security-Regeln also flexibler und smarter.
+ */
 @Service("nachweisSecurityService")
 @RequiredArgsConstructor
 public class NachweisSecurityService {

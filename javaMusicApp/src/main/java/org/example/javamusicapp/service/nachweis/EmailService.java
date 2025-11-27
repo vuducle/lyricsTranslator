@@ -12,6 +12,21 @@ import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+/**
+ * 📧 **Was geht hier ab?**
+ * Dieser Service ist unsere Brieftaube. Er ist für alles zuständig, was mit dem
+ * Versenden von E-Mails zu tun hat. Läuft alles `@Async`, also im Hintergrund,
+ * damit die App nicht warten muss, bis die Mail raus ist.
+ *
+ * Die Skills:
+ * - **sendEmailWithAttachment()**: Schickt 'ne Mail mit Anhang raus. Wird z.B. benutzt,
+ *   um dem Azubi seinen generierten Ausbildungsnachweis als PDF zu schicken.
+ * - **sendEmail()**: Schickt 'ne normale Text- oder HTML-Mail.
+ * - **sendPasswordResetEmail()**: Ein spezieller Skill, der eine fresh designte HTML-Mail
+ *   mit dem Link zum Zurücksetzen des Passworts an den User schickt.
+ *
+ * Hält unsere User also immer auf dem Laufenden, was in der App so passiert.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

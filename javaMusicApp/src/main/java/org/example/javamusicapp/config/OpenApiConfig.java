@@ -9,10 +9,16 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/*
-* Config file for SwaggerUI
-*
-* */
+/**
+ * 💅 **Was geht hier ab?**
+ * Diese Klasse pimpt unsere API-Doku. Sie nutzt OpenAPI (aka Swagger), um automatisch 'ne interaktive Webseite
+ * zu generieren, auf der alle API-Endpunkte gelistet sind. Richtig lit, weil man da direkt testen kann,
+ * welche Daten man senden muss und was zurückkommt.
+ *
+ * Außerdem fügt sie den "Authorize"-Button hinzu, damit man seinen JWT-Token eingeben und auch die
+ * geschützten Endpunkte easy testen kann. Spart massiv Zeit, weil man nicht alles manuell
+ * in Postman oder so reinhacken muss.
+ */
 @Configuration
 public class OpenApiConfig {
 

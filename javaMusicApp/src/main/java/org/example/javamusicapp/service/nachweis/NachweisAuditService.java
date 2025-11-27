@@ -13,6 +13,21 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * 🕵️‍♀️ **Was geht hier ab?**
+ * Dieser Service ist der Historiker für unsere Ausbildungsnachweise. Er protokolliert
+ * jede einzelne Aktion, die mit einem Nachweis passiert.
+ *
+ * Sein einziger, aber ultra wichtiger Job:
+ * - **loggeNachweisAktion()**: Immer wenn ein Nachweis erstellt, bearbeitet oder sein
+ *   Status geändert wird, ruft der `NachweisService` diese Methode auf.
+ *   Sie speichert dann einen `NachweisAuditLog`-Eintrag in der Datenbank.
+ *
+ * Das Besondere: Sie speichert den alten Zustand und den neuen Zustand des Nachweises
+ * als JSON-String. Dadurch kann man später im Audit-Log ganz genau sehen, welche
+ * Felder sich geändert haben. Man weiß also immer, wer was wann geändert hat.
+ * Macht alles transparent und nachvollziehbar.
+ */
 @Service
 @Slf4j
 public class NachweisAuditService {

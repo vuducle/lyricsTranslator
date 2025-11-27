@@ -9,6 +9,18 @@ import javax.imageio.ImageWriter;
 import javax.imageio.ImageReader;
 import java.util.*;
 
+/**
+ * 🧐 **Was geht hier ab?**
+ * Dieser Controller ist ein reines internes Hilfs-Tool, wahrscheinlich zum Debuggen.
+ * Er ist nicht für den normalen User gedacht.
+ *
+ * Sein Job ist es, Infos über die `ImageIO`-Fähigkeiten der Java-Umgebung rauszuhauen.
+ * Er listet auf, welche Bildformate (wie JPG, PNG, WebP) die App lesen und schreiben kann
+ * und welche Treiber-Klassen dafür am Start sind.
+ *
+ * Richtig nützlich, wenn man Probleme mit Bild-Uploads oder -Verarbeitung hat und checken will,
+ * ob die richtigen Libraries überhaupt geladen sind.
+ */
 @RestController
 public class ImageIOController {
 

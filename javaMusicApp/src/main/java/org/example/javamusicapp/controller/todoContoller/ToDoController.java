@@ -24,6 +24,20 @@ import java.util.UUID;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.example.javamusicapp.controller.todoContoller.dto.UpdateToDoRequest;
 
+/**
+ * ✅ **Was geht hier ab?**
+ * Das ist ein klassischer Controller für eine To-Do-Liste. Jeder User, der eingeloggt ist,
+ * kann hier seine eigenen To-Do-Items managen. Full-on self-organization.
+ *
+ * Die Endpunkte sind Standard-CRUD-Vibes:
+ * - **POST /**: Erstellt ein neues To-Do für den eingeloggten User.
+ * - **GET /me**: Listet alle To-Dos vom eingeloggten User auf.
+ * - **DELETE /{id}**: Löscht ein To-Do, aber nur, wenn es dir auch gehört.
+ * - **PATCH /{id}**: Updated ein To-Do teilweise (z.B. nur den Status ändern).
+ * - **PUT /{id}**: Updated ein To-Do komplett.
+ *
+ * Wichtig: Man kann immer nur seine eigenen To-Dos sehen und bearbeiten. No peeking at other's lists!
+ */
 @RestController
 @RequestMapping("/api/todos")
 public class ToDoController {

@@ -39,6 +39,26 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import org.springframework.beans.factory.annotation.Value;
 
+/**
+ * 👑 **Was geht hier ab?**
+ * Das ist der absolute Endgegner-Service für alles, was mit Usern zu tun hat.
+ * Er ist das Gehirn für die User-Verwaltung und arbeitet eng mit Spring Security zusammen.
+ *
+ * Seine Superkräfte im Überblick:
+ * - **UserDetailsService-Implementierung**: Holt die User-Daten für Spring Security,
+ *   damit der Login und die Rechteprüfung klappen. Hier wird die E-Mail als "Username"
+ *   für den Login verwendet.
+ * - **Passwort-Management**: Beinhaltet die Logik zum Ändern des eigenen Passworts und zum
+ *   Zurücksetzen, wenn man es mal vergessen hat. Alles natürlich safe mit Hashing.
+ * - **Profil-Updates**: Managed das Aktualisieren von User-Infos wie Name, Azubi-Jahr etc.
+ * - **Profilbild-Upload**: Richtig krasser Stuff hier. Nimmt ein Bild, checkt es,
+ *   skaliert es auf eine vernünftige Größe, optimiert es und versucht, es als modernes
+ *   WebP zu speichern. Wenn das nicht geht, gibt's ein JPEG als Fallback. Löscht auch alte Bilder.
+ * - **Admin-Aktionen**: Beinhaltet die Logik, um Usern Admin-Rechte zu geben oder zu entziehen.
+ *   Das wird natürlich alles im `RoleAuditService` protokolliert.
+ * - **User löschen**: Eine kritische Methode, die einen User nicht nur aus der DB löscht,
+ *   sondern auch all seine zugehörigen Daten wie Nachweise und das Profilbild entfernt.
+ */
 @Slf4j
 @Service
 public class UserService implements UserDetailsService {

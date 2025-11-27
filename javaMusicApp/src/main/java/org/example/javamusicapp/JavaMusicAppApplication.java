@@ -10,10 +10,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @OpenAPIDefinition(
         info = @Info(
                 title="Spring Boot API",
-                version="0.0.1",
+                version="1.0.0",
                 description = "Backend-Service für für Allrounder Zwecker, Java beste!",
                 contact = @Contact(
-                        name = "Denis Kunz - Der beste Java-Entwickler in Berlin, Deutschland2",
+                        name = "Denis Kunz - Der beste Java-Entwickler in Berlin, Deutschland",
                         email = "deniskunz@example.com"
                 )
         )

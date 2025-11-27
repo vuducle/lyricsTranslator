@@ -9,6 +9,20 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 📋 **Was geht hier ab?**
+ * Dieser Service ist das Backend für die To-Do-Liste. Er beinhaltet die ganze Business-Logik,
+ * die der `ToDoController` braucht, um zu funktionieren.
+ *
+ * Die Haupt-Gigs sind:
+ * - **createToDo()**: Erstellt ein neues To-Do und weist es dem eingeloggten User zu.
+ * - **findByUserUsername()**: Holt alle To-Dos für einen bestimmten User aus der Datenbank.
+ * - **deleteToDoIfOwner()**: Löscht ein To-Do, aber nur, wenn der User, der die Anfrage stellt,
+ *   auch der Owner des To-Dos ist. Security first!
+ * - **update/replaceToDoIfOwner()**: Aktualisiert ein To-Do, ebenfalls mit Sicherheitscheck.
+ *
+ * Stellt also sicher, dass jeder nur seinen eigenen Kram managen kann.
+ */
 @Service
 public class ToDoService {
     private final ToDoRepository toDoRepository;

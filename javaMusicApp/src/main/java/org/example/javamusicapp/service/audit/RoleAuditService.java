@@ -11,6 +11,18 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 📝 **Was geht hier ab?**
+ * Dieser Service ist das Gehirn hinter dem Rollen-Audit. Hier läuft die Business-Logik,
+ * wenn es um das Nachverfolgen von Rollen-Änderungen geht.
+ *
+ * Seine Hauptaufgaben:
+ * - **record()**: Wird aufgerufen, wenn jemand einem User eine Rolle gibt oder wegnimmt.
+ *   Der Service erstellt dann einen `RoleAudit`-Eintrag in der Datenbank mit allen wichtigen
+ *   Infos: Wer hat's getan, bei wem wurde was geändert und wann.
+ * - **list()**: Holt alle Audit-Einträge aus der Datenbank, schön sortiert und aufgeteilt
+ *   in Seiten (paginated), damit der `RoleAuditController` sie anzeigen kann.
+ */
 @Service
 public class RoleAuditService {
     private final RoleAuditRepository repository;

@@ -10,6 +10,16 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+/**
+ * 🚀 **Was geht hier ab?**
+ * Hier wird die Connection zu Redis klargemacht. Redis ist 'ne geisteskrank schnelle In-Memory-Datenbank.
+ * Wir nutzen die als Cache, um Daten, die oft gebraucht werden, zwischenzuspeichern (z.B. User-Sessions,
+ * häufig abgefragte Daten).
+ *
+ * Statt jedes Mal lahm auf die Haupt-DB zuzugreifen, holt sich die App die Daten blitzschnell aus Redis.
+ * Das gibt der App 'nen krassen Performance-Boost und sorgt für 'nen smootheren Vibe.
+ * Diese Klasse stellt sicher, dass die App weiß, wo Redis läuft und wie sie damit quatschen soll.
+ */
 @Configuration
 @EnableRedisRepositories(basePackages = "org.example.javamusicapp.repository")
 public class RedisConfig {

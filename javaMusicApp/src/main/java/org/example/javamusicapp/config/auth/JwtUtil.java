@@ -15,6 +15,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * 🛠️ **Was geht hier ab?**
+ * Das ist unser Schweizer Taschenmesser für alles, was mit JSON Web Tokens (JWTs) zu tun hat.
+ * Diese Utility-Klasse ist der Go-To-Guy für die `JwtAuthenticationFilter` und den `AuthController`.
+ *
+ * Ihre Skills:
+ * - **Token generieren:** Erstellt einen neuen, signierten JWT für einen User, z.B. direkt nach dem Login.
+ *   In den Token packt sie wichtige Infos wie E-Mail (als Subject), User-Rollen und ein Ablaufdatum.
+ * - **Token validieren:** Checkt, ob ein Token, der mit einem Request reinkommt, echt ist (über die Signatur)
+ *   und ob er nicht schon abgelaufen ist.
+ * - **Infos auslesen:** Kann alle Claims (die Infos im Token) auslesen, z.B. das Subject (die E-Mail des Users),
+ *   um den User in der Datenbank zu finden.
+ *
+ * Absolut central für die ganze Auth-Logik.
+ */
 @Component
 public class JwtUtil {
     @Value("${jwt.secret}")
