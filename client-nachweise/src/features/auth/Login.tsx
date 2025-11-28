@@ -36,7 +36,7 @@ export default function LoginForm() {
         email,
         password,
       });
-      const { accessToken, refreshToken, id, name } = response.data;
+      const { accessToken, refreshToken, id, name, roles } = response.data;
       dispatch(
         setUser({
           token: accessToken,
@@ -45,6 +45,7 @@ export default function LoginForm() {
           email,
           name,
           isLoggedIn: true,
+          roles,
         })
       );
       router.push('/');

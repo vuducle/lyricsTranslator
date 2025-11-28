@@ -149,6 +149,7 @@ public class AuthController {
             response.setUsername(userDetails.getUsername());
             response.setEmail(userDetails.getEmail());
             response.setName(userDetails.getName());
+            response.setRoles(userDetails.getRoles().stream().map(Role::getName).map(Enum::name).toList());
 
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {

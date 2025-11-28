@@ -21,30 +21,44 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.beans.factory.annotation.Value;
+import java.util.Arrays;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * 🏰 **Was geht hier ab?**
- * Das ist die Festungsmauer unserer App. Hier wird die komplette Security geregelt. Die Klasse ist quasi
- * die Security-Zentrale und eine der wichtigsten Klassen im ganzen Projekt. No cap.
+ * Das ist die Festungsmauer unserer App. Hier wird die komplette Security
+ * geregelt. Die Klasse ist quasi
+ * die Security-Zentrale und eine der wichtigsten Klassen im ganzen Projekt. No
+ * cap.
  *
  * Was sie genau macht:
- * 1.  **Routen schützen:** Legt fest, welche API-Routen public sind (z.B. `/api/auth/**` für Login/Register)
- *     und welche einen gültigen JWT-Token brauchen (basically alle anderen).
- * 2.  **Stateless-Modus:** Stellt die Sessions auf `STATELESS`. Heißt, der Server speichert keine Login-Infos.
- *     Jeder Request muss den JWT mitschicken, um sich auszuweisen. Das ist modern und skaliert besser.
- * 3.  **Filter einbauen:** Hängt unsere custom Filter in die Security-Kette rein.
- *     - `RateLimitFilter`: Kommt fast zuerst, um Spammer früh zu blocken.
- *     - `JwtAuthenticationFilter`: Kommt vor dem Standard-Login-Filter, um die JWTs zu checken.
- * 4.  **CORS:** Konfiguriert die CORS-Regeln, damit das Frontend mit dem Backend quatschen kann, ohne dass
- *     der Browser es blockt.
- * 5.  **Error Handling:** Sagt der App, dass sie den `JwtAuthEntryPoint` nutzen soll, wenn ein Non-Admin-User
- *     auf 'nen Admin-Endpoint will.
+ * 1. **Routen schützen:** Legt fest, welche API-Routen public sind (z.B.
+ * `/api/auth/**` für Login/Register)
+ * und welche einen gültigen JWT-Token brauchen (basically alle anderen).
+ * 2. **Stateless-Modus:** Stellt die Sessions auf `STATELESS`. Heißt, der
+ * Server speichert keine Login-Infos.
+ * Jeder Request muss den JWT mitschicken, um sich auszuweisen. Das ist modern
+ * und skaliert besser.
+ * 3. **Filter einbauen:** Hängt unsere custom Filter in die Security-Kette
+ * rein.
+ * - `RateLimitFilter`: Kommt fast zuerst, um Spammer früh zu blocken.
+ * - `JwtAuthenticationFilter`: Kommt vor dem Standard-Login-Filter, um die JWTs
+ * zu checken.
+ * 4. **CORS:** Konfiguriert die CORS-Regeln, damit das Frontend mit dem Backend
+ * quatschen kann, ohne dass
+ * der Browser es blockt.
+ * 5. **Error Handling:** Sagt der App, dass sie den `JwtAuthEntryPoint` nutzen
+ * soll, wenn ein Non-Admin-User
+ * auf 'nen Admin-Endpoint will.
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    @Value("${app.frontend.origins}")
+    private String frontendOrigins;
 
     // Pfade, die ohne Login zugänglich sein müssen (Auth, Swagger, CORS)
     private static final String[] PUBLIC_URLS = {
@@ -126,8 +140,13 @@ public class SecurityConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+                String[] origins = Arrays.stream(frontendOrigins.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .toArray(String[]::new);
+
                 registry.addMapping("/**")
-                        .allowedOrigins("*") // FÜR DEN TEST: Erlaube alle Ursprünge
+                        .allowedOrigins(origins)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*");
             }

@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './Providers';
 import { ToastProvider } from './ToastProvider';
+import { Navbar } from '@/components/ui/Navbar';
+import { AuthNavbarWrapper } from '@/components/ui/AuthNavbarWrapper';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -17,7 +19,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans antialiased`}>
         <Providers>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <AuthNavbarWrapper />
+            <main className="pt-16">{children}</main>
+          </ToastProvider>
         </Providers>
       </body>
     </html>

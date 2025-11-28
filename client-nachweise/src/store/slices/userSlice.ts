@@ -8,6 +8,7 @@ export interface User {
   email: string;
   name?: string;
   isLoggedIn: boolean;
+  roles: string[];
 }
 
 const initialState: User = {
@@ -17,6 +18,7 @@ const initialState: User = {
   email: '',
   name: '',
   isLoggedIn: false,
+  roles: [],
 };
 
 export const userSlice = createSlice({
@@ -30,6 +32,7 @@ export const userSlice = createSlice({
       state.name = action.payload.name ?? '';
       state.email = action.payload.email;
       state.isLoggedIn = action.payload.isLoggedIn;
+      state.roles = action.payload.roles;
     },
     clearUser: (state) => {
       state.id = '';

@@ -15,6 +15,9 @@ public class AuthResponse {
     @Schema(description = "Vollständiger Name des Benutzers", example = "Julian Nguyen")
     private String name;
 
+    @Schema(description = "Rollen des Benutzers", example = "[\"ROLE_USER\", \"ROLE_ADMIN\"]")
+    private java.util.List<String> roles;
+
     @Schema(description = "JWT-Zugriffstoken", example = "eyJhbGci...", accessMode = Schema.AccessMode.READ_ONLY)
     private String accessToken;
 
