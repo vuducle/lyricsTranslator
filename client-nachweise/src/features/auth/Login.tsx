@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function LoginForm() {
   const [email, setEmail] = useState<string>('');
@@ -116,6 +117,15 @@ export default function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+              </div>
+              <div className="text-sm">
+                <Link
+                  href="/forgot-password"
+                  className="font-medium text-primary hover:underline"
+                  passHref
+                >
+                  {t('login.forgotPassword')}
+                </Link>
               </div>
               {error && (
                 <p className="text-destructive text-sm">{error}</p>

@@ -10,7 +10,8 @@
       "invalid": "Invalid email or password.",
       "locked": "Your account is temporarily locked due to too many failed login attempts. Please wait 15 minutes.",
       "unexpected": "An unexpected error occurred."
-    }
+    },
+    "forgotPassword": "Forgot Password?"
   },
   "home": {
     "welcome": "Welcome, {name}!",
@@ -53,5 +54,30 @@
     "title": "🍪 We use cookies",
     "description": "This website uses cookies to enhance user experience. By using our website, you agree to the use of all cookies in accordance with our Privacy Policy.",
     "acceptButton": "Accept All Cookies"
+  },
+  "forgotPassword": {
+    "title": "Forgot Password",
+    "description": "Enter your email address to receive instructions on resetting your password.",
+    "submitButton": "Send Reset Link",
+    "successMessage": "If a match is found, we have sent instructions to reset your password to your email address.",
+    "error": {
+      "unexpected": "An unexpected error occurred. Please try again later."
+    }
+  },
+  "resetPassword": {
+    "title": "Reset Password",
+    "description": "Enter your new password below.",
+    "newPasswordLabel": "New Password",
+    "newPasswordPlaceholder": "Enter your new password",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter your new password",
+    "submitButton": "Reset Password",
+    "error": {
+      "mismatch": "Passwords do not match.",
+      "invalidToken": "The reset token is invalid or has expired.",
+      "unexpected": "An unexpected error occurred. Please try again later.",
+      "passwordTooShort": "Password must be at least 8 characters long."
+    },
+    "successMessage": "Your password has been successfully reset. You can now log in with your new password."
   }
 }
