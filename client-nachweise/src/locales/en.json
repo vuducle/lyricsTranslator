@@ -48,5 +48,10 @@
       "paragraph1": "All collected data, including the training records, are stored on a Virtual Private Server (VPS) within the European Union. We implement technical and organizational security measures to protect your data from loss, destruction, unauthorized access, alteration, or distribution."
     },
     "backToHome": "Back to Home"
+  },
+  "cookieBanner": {
+    "title": "🍪 We use cookies",
+    "description": "This website uses cookies to enhance user experience. By using our website, you agree to the use of all cookies in accordance with our Privacy Policy.",
+    "acceptButton": "Accept All Cookies"
   }
 }

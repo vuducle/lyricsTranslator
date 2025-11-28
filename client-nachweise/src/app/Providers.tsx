@@ -3,6 +3,7 @@
 import { ThemeProvider } from './ThemeProvider';
 import StoreProvider from './StoreProvider';
 import { LanguageProvider } from '@/context/LanguageContext';
+import { CookieBanner } from '@/components/ui/CookieBanner';
 import { Footer } from '@/components/ui/Footer';
 
 export function Providers({
@@ -20,7 +21,8 @@ export function Providers({
         <LanguageProvider>
           <div className="flex flex-col min-h-screen">
             {children}
-            <Footer />
+            <CookieBanner />
+            <Footer></Footer>
           </div>
         </LanguageProvider>
       </StoreProvider>

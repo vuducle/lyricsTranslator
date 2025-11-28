@@ -48,5 +48,10 @@
       "paragraph1": "Alle gesammelten Daten, einschließlich der Nachweise, werden auf einem Virtual Private Server (VPS) innerhalb der Europäischen Union gespeichert. Wir treffen technische und organisatorische Sicherheitsmaßnahmen, um deine Daten vor Verlust, Zerstörung, Zugriff, Veränderung oder Verbreitung durch unbefugte Personen zu schützen."
     },
     "backToHome": "Zurück zur Startseite"
+  },
+  "cookieBanner": {
+    "title": "🍪 Wir verwenden Cookies",
+    "description": "Diese Website verwendet Cookies, um die Benutzerfreundlichkeit zu verbessern. Durch die Nutzung unserer Website stimmst du der Verwendung aller Cookies gemäß unserer Datenschutzrichtlinie zu.",
+    "acceptButton": "Alle Cookies akzeptieren"
   }
 }
